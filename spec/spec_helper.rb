@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require "oscal"
+require "canon/rspec_matchers"
+require_relative "support/oscal_content"
+require_relative "shared_examples/round_trip"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -11,5 +14,13 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  # Exclude slow/NIST tests by default; run with --tag nist or --tag slow
+  config.filter_run_excluding slow: true, nist: true
+  config.run_all_when_everything_filtered = true
+
+  config.before(:suite) do
+    Oscal.default_version_module.init_models!
   end
 end
