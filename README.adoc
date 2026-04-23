@@ -2,13 +2,14 @@
 
 == Purpose
 
-This is an implementation of the OSCAL models, allowing the manipulation of
-these models, as well as reading and writing of OSCAL serialization formats
-(YAML, JSON, XML).
+A Ruby library for
+https://pages.nist.gov/OSCAL/[OSCAL] (Open Security Controls Assessment Language)
+models. All 226 model classes for OSCAL 1.2.1 are generated from the official
+NIST Metaschema definitions, supporting XML, JSON, and YAML serialization with
+round-trip fidelity.
 
-NOTE: This gem is used by the
+This gem is used by the
 https://github.com/metanorma/metanorma-plugin-oscal[Metanorma plugin for OSCAL].
-
 
 == Installation
 
@@ -26,90 +27,235 @@ or add it to your `Gemfile`:
 gem 'oscal'
 ----
 
-== Command-line usage
-
-TODO: Write usage instructions here
+== Quick start
 
 [source,ruby]
 ----
-> require 'oscal'
-> x = Oscal::Catalog.load_from_yaml('spec/oscal-content/examples/catalog/yaml/basic-catalog.yaml')
-=>
-#<Oscal::Catalog:0x000000010b817e08
-...
-> x.groups.first.groups.first.parts.first.prose
-=> "To establish a management framework to initiate and control the implementation and operation of information security within the organization."
+require "oscal"
+
+# Parse any OSCAL document — auto-detects format and version
+doc = Oscal.parse(File.read("catalog.xml"))
+doc = Oscal.parse(File.read("catalog.json"))
+doc = Oscal.parse(File.read("catalog.yaml"))
 ----
 
-Get all controls
+== Supported document types
+
+All 8 OSCAL root document types are supported:
+
+|===
+| Class | XML root element | Description
+
+| `Catalog` | `<catalog>` | Control catalogs
+| `Profile` | `<profile>` | Control profiles / baselines
+| `ComponentDefinition` | `<component-definition>` | Component definitions
+| `SystemSecurityPlan` | `<system-security-plan>` | System security plans
+| `AssessmentPlan` | `<assessment-plan>` | Assessment plans
+| `AssessmentResults` | `<assessment-results>` | Assessment results
+| `PlanOfActionAndMilestones` | `<plan-of-action-and-milestones>` | POA&Ms
+| `MappingCollection` | `<mapping-collection>` | Mapping collections
+|===
+
+== Parsing
+
+=== Direct parsing by format
 
 [source,ruby]
 ----
-> require 'oscal'
-> x = Oscal::Catalog.load_from_yaml('spec/oscal-content/examples/catalog/yaml/basic-catalog.yaml')
-=>
-#<Oscal::Catalog:0x000000010b817e08
-...
-> o = x.get_all_controls
-> o.count
-=> 4
+# XML
+catalog = Oscal::Catalog.from_xml(File.read("catalog.xml"))
+
+# JSON
+profile = Oscal::Profile.from_json(File.read("profile.json"))
+
+# YAML
+ssp = Oscal::SystemSecurityPlan.from_yaml(File.read("ssp.yaml"))
 ----
 
-Find object by id
+=== Auto-detection with `Oscal.parse`
+
+`Oscal.parse` detects the document format (XML, JSON, or YAML), the OSCAL
+version from `<oscal-version>`, and the root model type automatically:
 
 [source,ruby]
 ----
-> require 'oscal'
-> x = Oscal::Catalog.load_from_yaml('spec/oscal-content/examples/catalog/yaml/basic-catalog.yaml')
-=>
-#<Oscal::Catalog:0x000000010b817e08
-...
-> p = x.find_object_by_id('s1.1_smt')
-=>
-#<Oscal::Part:0x000000014c0c4070 @id="s1.1_smt", ...>
+# From XML — detects <catalog> root, version from metadata
+doc = Oscal.parse(File.read("catalog.xml"))
+
+# From JSON — detects root key, version from metadata
+doc = Oscal.parse(File.read("component-definition.json"))
+
+# Force a specific model type (useful for incomplete documents)
+doc = Oscal.parse(xml_string, model: :profile)
 ----
 
-Find object by uuid
+== Serialization
 
 [source,ruby]
 ----
-> require 'oscal'
-> x = Oscal::Catalog.load_from_yaml('spec/oscal-content/examples/catalog/yaml/basic-catalog.yaml')
-=>
-#<Oscal::Catalog:0x000000010b817e08
-...
-> p = x.find_object_by_id('74c8ba1e-5cd4-4ad1-bbfd-d888e2f6c724', x, :uuid)
-=>
-#<Oscal::Catalog:0x000000014c0c5f38 @uuid="74c8ba1e-5cd4-4ad1-bbfd-d888e2f6c724", ...>
+# To XML
+xml = Oscal::Catalog.to_xml(catalog)
+File.write("output.xml", xml)
+
+# To JSON
+json = Oscal::Catalog.to_json(catalog)
+File.write("output.json", json)
+
+# To YAML
+yaml = Oscal::Catalog.to_yaml(catalog)
+File.write("output.yaml", yaml)
 ----
 
-== Ruby library usage
+== Accessing model data
 
-TODO: Write usage instructions here
+Model classes are standard `Lutaml::Model::Serializable` objects with typed
+attributes:
+
+[source,ruby]
+----
+catalog = Oscal::Catalog.from_xml(File.read("catalog.xml"))
+
+# Top-level attributes
+catalog.uuid          # => "74c8ba1e-5cd4-4ad1-bbfd-d888e2f6c724"
+
+# Metadata
+catalog.metadata.title.content         # => ["Sample Security Catalog"]
+catalog.metadata.oscal_version.content # => ["1.0.0"]
+catalog.metadata.last_modified.content # => ["2024-01-01T00:00:00Z"]
+
+# Navigate groups and controls
+groups = catalog.group                 # => Array of Group objects
+groups.first.title.content             # => ["Organization of Information Security"]
+groups.first.control                   # => Array of Control objects
+
+# Back matter
+catalog.back_matter.resource            # => Array of Resource objects
+----
+
+NOTE: Markup content fields (like `title`, `description`, `prose`) use mixed
+content and return arrays. Use `.content.join` to get a plain string, or
+access individual elements for structured markup.
+
+== Version support
+
+The gem uses a version registry to support multiple OSCAL schema versions.
+Currently OSCAL 1.2.1 is included; adding new versions follows the same pattern
+(see link:ADDING_VERSIONS.adoc[]).
+
+[source,ruby]
+----
+# Default (latest registered version)
+Oscal.default_version_module  # => Oscal::V1_2_1
+
+# Explicit version
+v121 = Oscal.version("1.2.1")
+v121::Catalog.from_xml(xml)
+
+# Check available versions
+Oscal::VersionRegistry.available_versions   # => ["1.2.1"]
+
+# Detect version from a document
+Oscal::VersionRegistry.detect_version(xml_string)   # => "1.2.1"
+Oscal::VersionRegistry.detect_version(json_string)  # => "1.2.1"
+
+# Detect model type from a document
+Oscal::VersionRegistry.detect_model_type(xml_string)  # => :catalog
+Oscal::VersionRegistry.detect_model_type(json_string)  # => :profile
+----
+
+== Code generation
+
+Model classes are generated from the NIST OSCAL Metaschema XML definitions
+using the https://github.com/lutaml/metaschema[`metaschema` gem]. This ensures
+the Ruby models stay faithful to the official OSCAL schema specification.
+
+=== Regenerating models
+
+[source,bash]
+----
+# Generate OSCAL 1.2.1 (default)
+bundle exec rake oscal:generate
+
+# Generate a specific version
+bundle exec rake oscal:generate[1.3.0]
+----
+
+This creates `lib/oscal/v1_2_1/all_models.rb` containing all 226 model classes
+with XML and key-value (JSON/YAML) mappings.
+
+=== How it works
+
+. The `metaschema` gem parses the OSCAL Metaschema XML
+  (`oscal_complete_metaschema.xml`)
+. `Metaschema::ModelGenerator` creates in-memory Ruby classes from the
+  metaschema definitions
+. `Metaschema::RubySourceEmitter` serializes them to Ruby source code
+. Each class uses `Lutaml::Model::Serializable` for serialization
+
+== Architecture
+
+[graphviz]
+----
+digraph {
+  rankdir=LR
+  MetaschemaXML -> ModelGenerator [label="parse"]
+  ModelGenerator -> RubySourceEmitter [label="emit"]
+  RubySourceEmitter -> AllModels [label="all_models.rb"]
+  AllModels -> Runtime [label="require"]
+  Runtime -> XML [label="from_xml / to_xml"]
+  Runtime -> JSON [label="from_json / to_json"]
+  Runtime -> YAML [label="from_yaml / to_yaml"]
+}
+----
+
+=== Version register system
+
+Each OSCAL version has its own `Lutaml::Model::Register` for type resolution:
+
+- **Register ID**: `:oscal_1_2_1`
+- **Fallback chain**: `:oscal_common` -> `:default`
+- Generated code uses symbol type references (`:metadata`, `:control`) that
+  resolve through the version-specific register, enabling version swappability
+
+=== File layout
+
+----
+lib/oscal.rb                     # Facade: parse(), version(), const_missing
+lib/oscal/version.rb             # Gem version
+lib/oscal/versioned.rb           # Base module for version modules
+lib/oscal/version_registry.rb    # Version detection and registration
+lib/oscal/v1_2_1.rb              # OSCAL 1.2.1 version module
+lib/oscal/v1_2_1/all_models.rb   # 226 generated model classes
+----
 
 == Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run
-`rake spec` to run the tests. You can also run `bin/console` for an interactive
-prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies.
+Then run `rake spec` to run the tests. You can also run `bin/console` for an
+interactive prompt.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To
-release a new version, update the version number in `version.rb`, and then run
-`bundle exec rake release`, which will create a git tag for the version, push
-git commits and the created tag, and push the `.gem` file to
-https://rubygems.org.
+[source,bash]
+----
+# Run default tests (excludes large NIST fixtures)
+bundle exec rake spec
+
+# Run with NIST SP 800-53 tests (requires oscal-content submodule)
+bundle exec rspec --tag nist
+
+# Run everything including slow cross-format tests
+bundle exec rspec --tag slow
+
+# Regenerate model classes
+bundle exec rake oscal:generate
+----
 
 == Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/metanorma/oscal. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the https://github.com/metanorma/oscal/blob/main/CODE_OF_CONDUCT.md[code of conduct].
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/lutaml/oscal-ruby.
 
-== Code of Conduct
+== License
 
-Everyone interacting in the Oscal project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the https://github.com/metanorma/oscal/blob/main/CODE_OF_CONDUCT.md[code of conduct].
-
-== LICENSE
-
-Copyright Ribose. The OSCAL schema is published by NIST.
+Copyright Ribose Inc. The OSCAL schema is published by NIST.
 
 Published under the 2-clause BSD license.
-
