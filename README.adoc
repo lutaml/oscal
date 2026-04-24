@@ -187,10 +187,12 @@ with XML and key-value (JSON/YAML) mappings.
 
 . The `metaschema` gem parses the OSCAL Metaschema XML
   (`oscal_complete_metaschema.xml`)
-. `Metaschema::ModelGenerator` creates in-memory Ruby classes from the
-  metaschema definitions
+. `Metaschema::ModelGenerator` delegates to `FieldFactory` and
+  `AssemblyFactory` to create in-memory Ruby classes
 . `Metaschema::RubySourceEmitter` serializes them to Ruby source code
 . Each class uses `Lutaml::Model::Serializable` for serialization
+. Service objects (`FieldSerializer`, `FieldDeserializer`) handle
+  SINGLETON_OR_ARRAY patterns and collapsible fields
 
 == Architecture
 
