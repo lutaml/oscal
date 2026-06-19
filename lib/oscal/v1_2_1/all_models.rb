@@ -7,23 +7,407 @@ module Oscal::V1_2_1
     end
   end
 
+  class Namespace < Lutaml::Xml::Namespace
+    uri "http://csrc.nist.gov/ns/oscal/1.0"
+    prefix_default nil
+  end
+
+  class InsertType < Lutaml::Model::Serializable; end
+  class ImageType < Lutaml::Model::Serializable; end
+  class AnchorType < Lutaml::Model::Serializable; end
+  class CodeType < Lutaml::Model::Serializable; end
+  class InlineMarkupType < Lutaml::Model::Serializable; end
+  class ListType < Lutaml::Model::Serializable; end
+  class OrderedListType < Lutaml::Model::Serializable; end
+  class ListItemType < Lutaml::Model::Serializable; end
+  class PreformattedType < Lutaml::Model::Serializable; end
+  class BlockQuoteType < Lutaml::Model::Serializable; end
+  class TableType < Lutaml::Model::Serializable; end
+  class TableRowType < Lutaml::Model::Serializable; end
+  class TableCellType < Lutaml::Model::Serializable; end
+
+  class InsertType < Lutaml::Model::Serializable
+    attribute :type, :string
+    attribute :id_ref, :string
+
+    xml do
+      element "insertType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_attribute "type", to: :type
+      map_attribute "id-ref", to: :id_ref
+    end
+  end
+
+  class ImageType < Lutaml::Model::Serializable
+    attribute :alt, :string
+    attribute :src, :string
+    attribute :title, :string
+
+    xml do
+      element "imageType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_attribute "alt", to: :alt
+      map_attribute "src", to: :src
+      map_attribute "title", to: :title
+    end
+  end
+
+  class AnchorType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :href, :string
+    attribute :title, :string
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "anchorType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_content to: :content
+      map_attribute "href", to: :href
+      map_attribute "title", to: :title
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+  end
+
+  class CodeType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :klass, :string
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "codeType"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+
+      map_content to: :content
+      map_attribute "class", to: :klass
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+  end
+
+  class AnchorType < Lutaml::Model::Serializable
+  end
+
+  class CodeType < Lutaml::Model::Serializable
+  end
+
+  class InlineMarkupType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "inlineMarkupType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+  end
+
+  class ListType < Lutaml::Model::Serializable
+    attribute :li, ListItemType, collection: true
+
+    xml do
+      element "listType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_element "li", to: :li
+    end
+  end
+
+
+  class OrderedListType < Lutaml::Model::Serializable
+    attribute :start, :integer
+    attribute :li, ListItemType, collection: true
+
+    xml do
+      element "orderedListType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_attribute "start", to: :start
+      map_element "li", to: :li
+    end
+  end
+
+
+  class ListItemType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+
+    xml do
+      element "listItemType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "p", to: :p
+    end
+  end
+
+  class PreformattedType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "preformattedType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+  end
+
+  class BlockQuoteType < Lutaml::Model::Serializable
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :table, TableType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "blockQuoteType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "p", to: :p
+      map_element "table", to: :table
+      map_element "img", to: :img
+    end
+  end
+
+  class TableType < Lutaml::Model::Serializable
+    attribute :tr, TableRowType, collection: true
+
+    xml do
+      element "tableType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_element "tr", to: :tr
+    end
+  end
+
+  class TableRowType < Lutaml::Model::Serializable
+    attribute :td, TableCellType, collection: true
+    attribute :th, TableCellType, collection: true
+
+    xml do
+      element "tableRowType"
+      namespace Oscal::V1_2_1::Namespace
+
+      map_element "td", to: :td
+      map_element "th", to: :th
+    end
+  end
+
+  class TableCellType < Lutaml::Model::Serializable
+    attribute :content, :string, collection: true
+    attribute :align, :string, default: -> { "left" }
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "tableCellType"
+      mixed_content
+      namespace Oscal::V1_2_1::Namespace
+
+      map_content to: :content
+      map_attribute "align", to: :align
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+  end
+
   class MetadataTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -86,7 +470,7 @@ module Oscal::V1_2_1
     end
   end
   class MetadataRevision < Base
-    attribute :title, :string
+    attribute :title, :metadata_revision_title
     attribute :published, :published
     attribute :last_modified, :last_modified
     attribute :version, :version
@@ -97,6 +481,7 @@ module Oscal::V1_2_1
 
     xml do
       element "revision"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "title", to: :title
       map_element "published", to: :published
@@ -317,15 +702,16 @@ module Oscal::V1_2_1
   end
   class MetadataRole < Base
     attribute :id, :string
-    attribute :title, :string
-    attribute :short_name, :string
-    attribute :description, :string
+    attribute :title, :metadata_role_title
+    attribute :short_name, :metadata_role_short_name
+    attribute :description, :metadata_role_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "role"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "id", to: :id
       map_element "title", to: :title
@@ -416,17 +802,18 @@ module Oscal::V1_2_1
   end
   class MetadataLocation < Base
     attribute :uuid, :string
-    attribute :title, :string
+    attribute :title, :metadata_location_title
     attribute :address, :address
     attribute :email_address, :email_address, collection: true
     attribute :telephone_number, :telephone_number, collection: true
-    attribute :url, :string, collection: true
+    attribute :url, :url_in_metadata, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "location"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -570,8 +957,8 @@ module Oscal::V1_2_1
   class MetadataParty < Base
     attribute :uuid, :string
     attribute :type, :string
-    attribute :name, :string
-    attribute :short_name, :string
+    attribute :name, :name_in_metadata
+    attribute :short_name, :short_name_in_metadata
     attribute :external_id, :external_id_in_metadata, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
@@ -579,11 +966,12 @@ module Oscal::V1_2_1
     attribute :telephone_number, :telephone_number, collection: true
     attribute :address, :address, collection: true
     attribute :location_uuid, :location_uuid, collection: true
-    attribute :member_of_organization, :string, collection: true
+    attribute :member_of_organization, :member_of_organization_in_metadata, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "party"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "type", to: :type
@@ -766,21 +1154,22 @@ module Oscal::V1_2_1
   end
   class LinkText < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "text"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -844,17 +1233,18 @@ module Oscal::V1_2_1
   end
   class BackMatterResource < Base
     attribute :uuid, :string
-    attribute :title, :string
-    attribute :description, :string
+    attribute :title, :back_matter_resource_title
+    attribute :description, :back_matter_resource_description
     attribute :property, :property, collection: true
     attribute :document_id, :document_id, collection: true
-    attribute :citation, :string
-    attribute :rlink, :string, collection: true
+    attribute :citation, :back_matter_resource_citation
+    attribute :rlink, :back_matter_resource_rlink, collection: true
     attribute :base64, :base64_in_back_matter
     attribute :remarks, :remarks
 
     xml do
       element "resource"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -882,9 +1272,16 @@ module Oscal::V1_2_1
     def json_to_asm_citation_citation(instance, doc)
       current = instance.instance_variable_get(:@citation)
       if current.is_a?(Array)
-        doc["citation"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["citation"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::BackMatterResourceCitation.as_json(item) : item
+        end
       elsif current
-        doc["citation"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["citation"] = Oscal::V1_2_1::BackMatterResourceCitation.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["citation"] = val
+        end
       end
     end
 
@@ -907,9 +1304,16 @@ module Oscal::V1_2_1
     def json_to_asm_rlink_rlinks(instance, doc)
       current = instance.instance_variable_get(:@rlink)
       if current.is_a?(Array)
-        doc["rlinks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["rlinks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::BackMatterResourceRlink.as_json(item) : item
+        end
       elsif current
-        doc["rlinks"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["rlinks"] = Oscal::V1_2_1::BackMatterResourceRlink.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["rlinks"] = val
+        end
       end
     end
 
@@ -951,21 +1355,22 @@ module Oscal::V1_2_1
   end
   class PartTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1029,34 +1434,35 @@ module Oscal::V1_2_1
   end
   class PartProse < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "prose"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1146,21 +1552,22 @@ module Oscal::V1_2_1
   end
   class ParameterLabel < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "label"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1224,34 +1631,35 @@ module Oscal::V1_2_1
   end
   class ParameterUsage < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "usage"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1341,34 +1749,35 @@ module Oscal::V1_2_1
   end
   class ParameterConstraintDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1457,11 +1866,12 @@ module Oscal::V1_2_1
     end
   end
   class ParameterConstraintTest < Base
-    attribute :expression, :string
+    attribute :expression, :expression_in_parameter_constraint
     attribute :remarks, :remarks
 
     xml do
       element "test"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "expression", to: :expression
       map_element "remarks", to: :remarks
@@ -1510,34 +1920,35 @@ module Oscal::V1_2_1
   end
   class ParameterGuidelineProse < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "prose"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1627,21 +2038,22 @@ module Oscal::V1_2_1
   end
   class ParameterSelectionChoice < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "choice"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1705,21 +2117,22 @@ module Oscal::V1_2_1
   end
   class ControlTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1783,21 +2196,22 @@ module Oscal::V1_2_1
   end
   class GroupTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1861,34 +2275,35 @@ module Oscal::V1_2_1
   end
   class QualifierItemDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -1981,6 +2396,7 @@ module Oscal::V1_2_1
 
     xml do
       element "combine"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "method", to: :method_attr
     end
@@ -1993,6 +2409,7 @@ module Oscal::V1_2_1
 
     xml do
       element "flat"
+      namespace Oscal::V1_2_1::Namespace
       ordered
     end
   end
@@ -2002,6 +2419,7 @@ module Oscal::V1_2_1
 
     xml do
       element "custom"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "group", to: :group
       map_element "insert-controls", to: :insert_controls
@@ -2050,8 +2468,8 @@ module Oscal::V1_2_1
     attribute :depends_on, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :label, :string
-    attribute :usage, :string
+    attribute :label, :modify_set_parameter_label
+    attribute :usage, :modify_set_parameter_usage
     attribute :parameter_constraint, :parameter_constraint, collection: true
     attribute :parameter_guideline, :parameter_guideline, collection: true
     attribute :parameter_selection, :parameter_selection
@@ -2059,6 +2477,7 @@ module Oscal::V1_2_1
 
     xml do
       element "set-parameter"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "param-id", to: :param_id
       map_attribute "class", to: :class_attr
@@ -2201,11 +2620,12 @@ module Oscal::V1_2_1
   end
   class ModifyAlter < Base
     attribute :control_id, :string
-    attribute :remove, :string, collection: true
-    attribute :add, :string, collection: true
+    attribute :remove, :modify_alter_remove, collection: true
+    attribute :add, :modify_alter_add, collection: true
 
     xml do
       element "alter"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "control-id", to: :control_id
       map_element "remove", to: :remove
@@ -2221,38 +2641,53 @@ module Oscal::V1_2_1
     def json_to_asm_add_adds(instance, doc)
       current = instance.instance_variable_get(:@add)
       if current.is_a?(Array)
-        doc["adds"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["adds"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ModifyAlterAdd.as_json(item) : item
+        end
       elsif current
-        doc["adds"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["adds"] = Oscal::V1_2_1::ModifyAlterAdd.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["adds"] = val
+        end
       end
     end
 
     def json_to_asm_remove_removes(instance, doc)
       current = instance.instance_variable_get(:@remove)
       if current.is_a?(Array)
-        doc["removes"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["removes"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ModifyAlterRemove.as_json(item) : item
+        end
       elsif current
-        doc["removes"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["removes"] = Oscal::V1_2_1::ModifyAlterRemove.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["removes"] = val
+        end
       end
     end
   end
   class SystemComponentTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2316,34 +2751,35 @@ module Oscal::V1_2_1
   end
   class SystemComponentDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2433,21 +2869,22 @@ module Oscal::V1_2_1
   end
   class SystemComponentPurpose < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "purpose"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2515,6 +2952,7 @@ module Oscal::V1_2_1
 
     xml do
       element "status"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "state", to: :state
       map_element "remarks", to: :remarks
@@ -2563,21 +3001,22 @@ module Oscal::V1_2_1
   end
   class ProtocolTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2641,21 +3080,22 @@ module Oscal::V1_2_1
   end
   class SystemUserTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2719,34 +3159,35 @@ module Oscal::V1_2_1
   end
   class SystemUserDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2836,21 +3277,22 @@ module Oscal::V1_2_1
   end
   class AuthorizedPrivilegeTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -2914,34 +3356,35 @@ module Oscal::V1_2_1
   end
   class AuthorizedPrivilegeDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3031,34 +3474,35 @@ module Oscal::V1_2_1
   end
   class InventoryItemDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3155,6 +3599,7 @@ module Oscal::V1_2_1
 
     xml do
       element "implemented-component"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "component-uuid", to: :component_uuid
       map_element "prop", to: :property
@@ -3257,21 +3702,22 @@ module Oscal::V1_2_1
   end
   class DefinedComponentTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3335,34 +3781,35 @@ module Oscal::V1_2_1
   end
   class DefinedComponentDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3452,21 +3899,22 @@ module Oscal::V1_2_1
   end
   class DefinedComponentPurpose < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "purpose"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3530,34 +3978,35 @@ module Oscal::V1_2_1
   end
   class CapabilityDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3647,34 +4096,35 @@ module Oscal::V1_2_1
   end
   class ControlImplementationDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3764,34 +4214,35 @@ module Oscal::V1_2_1
   end
   class IncorporatesComponentDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3881,34 +4332,35 @@ module Oscal::V1_2_1
   end
   class ImplementedRequirementDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -3998,34 +4450,35 @@ module Oscal::V1_2_1
   end
   class StatementDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4115,34 +4568,35 @@ module Oscal::V1_2_1
   end
   class SystemCharacteristicsDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4232,15 +4686,16 @@ module Oscal::V1_2_1
   end
   class SystemImplementationLeveragedAuthorization < Base
     attribute :uuid, :string
-    attribute :title, :string
+    attribute :title, :system_implementation_leveraged_authorization_title
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :party_uuid, :string
+    attribute :party_uuid, :party_uuid_in_system_implementation
     attribute :date_authorized, :date_authorized
     attribute :remarks, :remarks
 
     xml do
       element "leveraged-authorization"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -4363,15 +4818,16 @@ module Oscal::V1_2_1
   end
   class SystemInformationInformationType < Base
     attribute :uuid, :string
-    attribute :title, :string
-    attribute :description, :string
-    attribute :categorization, :string, collection: true
+    attribute :title, :system_information_information_type_title
+    attribute :description, :system_information_information_type_description
+    attribute :categorization, :system_information_information_type_categorization, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :impact, :impact
 
     xml do
       element "information-type"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -4399,9 +4855,16 @@ module Oscal::V1_2_1
     def json_to_asm_categorization_categorizations(instance, doc)
       current = instance.instance_variable_get(:@categorization)
       if current.is_a?(Array)
-        doc["categorizations"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["categorizations"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemInformationInformationTypeCategorization.as_json(item) : item
+        end
       elsif current
-        doc["categorizations"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["categorizations"] = Oscal::V1_2_1::SystemInformationInformationTypeCategorization.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["categorizations"] = val
+        end
       end
     end
 
@@ -4491,34 +4954,35 @@ module Oscal::V1_2_1
   end
   class AuthorizationBoundaryDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4608,34 +5072,35 @@ module Oscal::V1_2_1
   end
   class NetworkArchitectureDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4725,34 +5190,35 @@ module Oscal::V1_2_1
   end
   class DataFlowDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4842,34 +5308,35 @@ module Oscal::V1_2_1
   end
   class DiagramDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -4959,21 +5426,22 @@ module Oscal::V1_2_1
   end
   class DiagramCaption < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "caption"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5037,34 +5505,35 @@ module Oscal::V1_2_1
   end
   class ByComponentDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5153,15 +5622,16 @@ module Oscal::V1_2_1
     end
   end
   class ByComponentExport < Base
-    attribute :description, :string
+    attribute :description, :by_component_export_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :provided, :string, collection: true
-    attribute :responsibility, :string, collection: true
+    attribute :provided, :by_component_export_provided, collection: true
+    attribute :responsibility, :by_component_export_responsibility, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "export"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -5215,18 +5685,32 @@ module Oscal::V1_2_1
     def json_to_asm_provided_provided(instance, doc)
       current = instance.instance_variable_get(:@provided)
       if current.is_a?(Array)
-        doc["provided"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["provided"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ByComponentExportProvided.as_json(item) : item
+        end
       elsif current
-        doc["provided"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["provided"] = Oscal::V1_2_1::ByComponentExportProvided.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["provided"] = val
+        end
       end
     end
 
     def json_to_asm_responsibility_responsibilities(instance, doc)
       current = instance.instance_variable_get(:@responsibility)
       if current.is_a?(Array)
-        doc["responsibilities"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["responsibilities"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ByComponentExportResponsibility.as_json(item) : item
+        end
       elsif current
-        doc["responsibilities"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsibilities"] = Oscal::V1_2_1::ByComponentExportResponsibility.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsibilities"] = val
+        end
       end
     end
 
@@ -5269,13 +5753,14 @@ module Oscal::V1_2_1
   class ByComponentInherited < Base
     attribute :uuid, :string
     attribute :provided_uuid, :string
-    attribute :description, :string
+    attribute :description, :by_component_inherited_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
 
     xml do
       element "inherited"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "provided-uuid", to: :provided_uuid
@@ -5345,7 +5830,7 @@ module Oscal::V1_2_1
   class ByComponentSatisfied < Base
     attribute :uuid, :string
     attribute :responsibility_uuid, :string
-    attribute :description, :string
+    attribute :description, :by_component_satisfied_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
@@ -5353,6 +5838,7 @@ module Oscal::V1_2_1
 
     xml do
       element "satisfied"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "responsibility-uuid", to: :responsibility_uuid
@@ -5459,34 +5945,35 @@ module Oscal::V1_2_1
   end
   class LocalObjectiveDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5576,34 +6063,35 @@ module Oscal::V1_2_1
   end
   class AssessmentMethodDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5693,21 +6181,22 @@ module Oscal::V1_2_1
   end
   class AssessmentPartTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5771,34 +6260,35 @@ module Oscal::V1_2_1
   end
   class AssessmentPartProse < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "prose"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5888,21 +6378,22 @@ module Oscal::V1_2_1
   end
   class ActivityTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -5966,34 +6457,35 @@ module Oscal::V1_2_1
   end
   class ActivityDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -6083,8 +6575,8 @@ module Oscal::V1_2_1
   end
   class ActivityStep < Base
     attribute :uuid, :string
-    attribute :title, :string
-    attribute :description, :string
+    attribute :title, :activity_step_title
+    attribute :description, :activity_step_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :reviewed_controls, :reviewed_controls
@@ -6093,6 +6585,7 @@ module Oscal::V1_2_1
 
     xml do
       element "step"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -6217,34 +6710,35 @@ module Oscal::V1_2_1
   end
   class ReviewedControlsDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -6333,7 +6827,7 @@ module Oscal::V1_2_1
     end
   end
   class ReviewedControlsControlSelection < Base
-    attribute :description, :string
+    attribute :description, :reviewed_controls_control_selection_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :include_all, :include_all
@@ -6342,6 +6836,7 @@ module Oscal::V1_2_1
 
     xml do
       element "control-selection"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -6479,7 +6974,7 @@ module Oscal::V1_2_1
     end
   end
   class ReviewedControlsControlObjectiveSelection < Base
-    attribute :description, :string
+    attribute :description, :reviewed_controls_control_objective_selection_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :include_all, :include_all
@@ -6488,6 +6983,7 @@ module Oscal::V1_2_1
 
     xml do
       element "control-objective-selection"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -6626,21 +7122,22 @@ module Oscal::V1_2_1
   end
   class TaskTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -6704,34 +7201,35 @@ module Oscal::V1_2_1
   end
   class TaskDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -6820,12 +7318,13 @@ module Oscal::V1_2_1
     end
   end
   class TaskTiming < Base
-    attribute :on_date, :string
-    attribute :within_date_range, :string
-    attribute :at_frequency, :string
+    attribute :on_date, :task_timing_on_date
+    attribute :within_date_range, :task_timing_within_date_range
+    attribute :at_frequency, :task_timing_at_frequency
 
     xml do
       element "timing"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "on-date", to: :on_date
       map_element "within-date-range", to: :within_date_range
@@ -6841,27 +7340,48 @@ module Oscal::V1_2_1
     def json_to_asm_at_frequency_at_frequency(instance, doc)
       current = instance.instance_variable_get(:@at_frequency)
       if current.is_a?(Array)
-        doc["at-frequency"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["at-frequency"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::TaskTimingAtFrequency.as_json(item) : item
+        end
       elsif current
-        doc["at-frequency"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["at-frequency"] = Oscal::V1_2_1::TaskTimingAtFrequency.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["at-frequency"] = val
+        end
       end
     end
 
     def json_to_asm_on_date_on_date(instance, doc)
       current = instance.instance_variable_get(:@on_date)
       if current.is_a?(Array)
-        doc["on-date"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["on-date"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::TaskTimingOnDate.as_json(item) : item
+        end
       elsif current
-        doc["on-date"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["on-date"] = Oscal::V1_2_1::TaskTimingOnDate.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["on-date"] = val
+        end
       end
     end
 
     def json_to_asm_within_date_range_within_date_range(instance, doc)
       current = instance.instance_variable_get(:@within_date_range)
       if current.is_a?(Array)
-        doc["within-date-range"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["within-date-range"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::TaskTimingWithinDateRange.as_json(item) : item
+        end
       elsif current
-        doc["within-date-range"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["within-date-range"] = Oscal::V1_2_1::TaskTimingWithinDateRange.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["within-date-range"] = val
+        end
       end
     end
   end
@@ -6871,6 +7391,7 @@ module Oscal::V1_2_1
 
     xml do
       element "dependency"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "task-uuid", to: :task_uuid
       map_element "remarks", to: :remarks
@@ -6927,6 +7448,7 @@ module Oscal::V1_2_1
 
     xml do
       element "associated-activity"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "activity-uuid", to: :activity_uuid
       map_element "prop", to: :property
@@ -7047,34 +7569,35 @@ module Oscal::V1_2_1
   end
   class AssessmentSubjectDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7164,34 +7687,35 @@ module Oscal::V1_2_1
   end
   class AssessmentSubjectPlaceholderDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7285,6 +7809,7 @@ module Oscal::V1_2_1
 
     xml do
       element "source"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "task-uuid", to: :task_uuid
       map_element "remarks", to: :remarks
@@ -7333,21 +7858,22 @@ module Oscal::V1_2_1
   end
   class SubjectReferenceTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7411,14 +7937,15 @@ module Oscal::V1_2_1
   end
   class AssessmentAssetsAssessmentPlatform < Base
     attribute :uuid, :string
-    attribute :title, :string
+    attribute :title, :assessment_assets_assessment_platform_title
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :uses_component, :string, collection: true
+    attribute :uses_component, :assessment_assets_assessment_platform_uses_component, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "assessment-platform"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -7472,9 +7999,16 @@ module Oscal::V1_2_1
     def json_to_asm_uses_component_uses_components(instance, doc)
       current = instance.instance_variable_get(:@uses_component)
       if current.is_a?(Array)
-        doc["uses-components"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["uses-components"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentAssetsAssessmentPlatformUsesComponent.as_json(item) : item
+        end
       elsif current
-        doc["uses-components"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["uses-components"] = Oscal::V1_2_1::AssessmentAssetsAssessmentPlatformUsesComponent.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["uses-components"] = val
+        end
       end
     end
 
@@ -7516,21 +8050,22 @@ module Oscal::V1_2_1
   end
   class FindingTargetTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7594,34 +8129,35 @@ module Oscal::V1_2_1
   end
   class FindingTargetDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7716,6 +8252,7 @@ module Oscal::V1_2_1
 
     xml do
       element "status"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "state", to: :state
       map_attribute "reason", to: :reason
@@ -7766,21 +8303,22 @@ module Oscal::V1_2_1
   end
   class FindingTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7844,34 +8382,35 @@ module Oscal::V1_2_1
   end
   class FindingDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -7961,21 +8500,22 @@ module Oscal::V1_2_1
   end
   class ObservationTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8039,34 +8579,35 @@ module Oscal::V1_2_1
   end
   class ObservationDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8156,13 +8697,14 @@ module Oscal::V1_2_1
   end
   class ObservationRelevantEvidence < Base
     attribute :href, :string
-    attribute :description, :string
+    attribute :description, :observation_relevant_evidence_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "relevant-evidence"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "description", to: :description
@@ -8253,6 +8795,7 @@ module Oscal::V1_2_1
 
     xml do
       element "identified-subject"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "subject-placeholder-uuid", to: :subject_placeholder_uuid
       map_element "subject", to: :assessment_subject
@@ -8285,21 +8828,22 @@ module Oscal::V1_2_1
   end
   class RiskTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8363,34 +8907,35 @@ module Oscal::V1_2_1
   end
   class RiskDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8480,34 +9025,35 @@ module Oscal::V1_2_1
   end
   class RiskStatement < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "statement"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8598,13 +9144,14 @@ module Oscal::V1_2_1
   class RiskMitigatingFactor < Base
     attribute :uuid, :string
     attribute :implementation_uuid, :string
-    attribute :description, :string
+    attribute :description, :risk_mitigating_factor_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :subject_reference, :subject_reference, collection: true
 
     xml do
       element "mitigating-factor"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "implementation-uuid", to: :implementation_uuid
@@ -8672,10 +9219,11 @@ module Oscal::V1_2_1
     end
   end
   class RiskRiskLog < Base
-    attribute :entry, :string, collection: true
+    attribute :entry, :risk_risk_log_entry, collection: true
 
     xml do
       element "risk-log"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "entry", to: :entry
     end
@@ -8687,9 +9235,16 @@ module Oscal::V1_2_1
     def json_to_asm_entry_entries(instance, doc)
       current = instance.instance_variable_get(:@entry)
       if current.is_a?(Array)
-        doc["entries"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["entries"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RiskRiskLogEntry.as_json(item) : item
+        end
       elsif current
-        doc["entries"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["entries"] = Oscal::V1_2_1::RiskRiskLogEntry.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["entries"] = val
+        end
       end
     end
   end
@@ -8703,6 +9258,7 @@ module Oscal::V1_2_1
 
     xml do
       element "facet"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "name", to: :name
       map_attribute "system", to: :system
@@ -8791,21 +9347,22 @@ module Oscal::V1_2_1
   end
   class ResponseTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8869,34 +9426,35 @@ module Oscal::V1_2_1
   end
   class ResponseDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -8987,14 +9545,15 @@ module Oscal::V1_2_1
   class ResponseRequiredAsset < Base
     attribute :uuid, :string
     attribute :subject_reference, :subject_reference, collection: true
-    attribute :title, :string
-    attribute :description, :string
+    attribute :title, :response_required_asset_title
+    attribute :description, :response_required_asset_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "required-asset"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "subject", to: :subject_reference
@@ -9109,6 +9668,7 @@ module Oscal::V1_2_1
 
     xml do
       element "local-definitions"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
@@ -9248,6 +9808,7 @@ module Oscal::V1_2_1
 
     xml do
       element "terms-and-conditions"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "part", to: :assessment_part
     end
@@ -9279,6 +9840,7 @@ module Oscal::V1_2_1
 
     xml do
       element "local-definitions"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "objectives-and-methods", to: :local_objective
       map_element "activity", to: :activity
@@ -9361,21 +9923,22 @@ module Oscal::V1_2_1
   end
   class ResultTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -9439,34 +10002,35 @@ module Oscal::V1_2_1
   end
   class ResultDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -9554,6 +10118,100 @@ module Oscal::V1_2_1
       Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
+  class ResultStart < Base
+    attribute :content, :string
+
+    xml do
+      element "start"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ResultEnd < Base
+    attribute :content, :string
+
+    xml do
+      element "end"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
   class ResultLocalDefinitions < Base
     attribute :system_component, :system_component, collection: true
     attribute :inventory_item, :inventory_item, collection: true
@@ -9563,6 +10221,7 @@ module Oscal::V1_2_1
 
     xml do
       element "local-definitions"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
@@ -9669,6 +10328,7 @@ module Oscal::V1_2_1
 
     xml do
       element "attestation"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "responsible-party", to: :responsible_party
       map_element "part", to: :assessment_part
@@ -9716,10 +10376,11 @@ module Oscal::V1_2_1
     end
   end
   class ResultAssessmentLog < Base
-    attribute :entry, :string, collection: true
+    attribute :entry, :result_assessment_log_entry, collection: true
 
     xml do
       element "assessment-log"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "entry", to: :entry
     end
@@ -9731,29 +10392,37 @@ module Oscal::V1_2_1
     def json_to_asm_entry_entries(instance, doc)
       current = instance.instance_variable_get(:@entry)
       if current.is_a?(Array)
-        doc["entries"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["entries"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResultAssessmentLogEntry.as_json(item) : item
+        end
       elsif current
-        doc["entries"] = current.respond_to?(:content) ? current.content : current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["entries"] = Oscal::V1_2_1::ResultAssessmentLogEntry.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["entries"] = val
+        end
       end
     end
   end
   class PoamItemTitle < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
 
     xml do
       element "title"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -9817,34 +10486,35 @@ module Oscal::V1_2_1
   end
   class PoamItemDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -9937,6 +10607,7 @@ module Oscal::V1_2_1
 
     xml do
       element "origin"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "actor", to: :origin_actor
     end
@@ -9971,6 +10642,7 @@ module Oscal::V1_2_1
 
     xml do
       element "related-finding"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "finding-uuid", to: :finding_uuid
       map_element "remarks", to: :remarks
@@ -10017,11 +10689,4352 @@ module Oscal::V1_2_1
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
+  class MetadataRevisionTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class MetadataRoleTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class MetadataRoleShortName < Base
+    attribute :content, :string
+
+    xml do
+      element "short-name"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class MetadataRoleDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class MetadataLocationTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class BackMatterResourceTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class BackMatterResourceDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class BackMatterResourceCitation < Base
+    attribute :text, :back_matter_resource_citation_text
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+
+    xml do
+      element "citation"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_element "text", to: :text
+      map_element "prop", to: :property
+      map_element "link", to: :link
+    end
+
+    key_value do
+      map "text", to: :text, render_empty: true
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+  end
+  class BackMatterResourceRlink < Base
+    attribute :href, :string
+    attribute :media_type, :string
+    attribute :hash_attr, :hash_field, collection: true
+
+    xml do
+      element "rlink"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "href", to: :href
+      map_attribute "media-type", to: :media_type
+      map_element "hash", to: :hash_attr
+    end
+
+    key_value do
+      map "href", to: :href
+      map "media-type", to: :media_type
+      map "hashes", to: :hash_attr, render_empty: true
+    end
+  end
+  class ModifySetParameterLabel < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "label"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ModifySetParameterUsage < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "usage"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ModifyAlterRemove < Base
+    attribute :by_name, :string
+    attribute :by_class, :string
+    attribute :by_id, :string
+    attribute :by_item_name, :string
+    attribute :by_ns, :string
+    attribute :remarks, :remarks
+
+    xml do
+      element "remove"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "by-name", to: :by_name
+      map_attribute "by-class", to: :by_class
+      map_attribute "by-id", to: :by_id
+      map_attribute "by-item-name", to: :by_item_name
+      map_attribute "by-ns", to: :by_ns
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "by-name", to: :by_name
+      map "by-class", to: :by_class
+      map "by-id", to: :by_id
+      map "by-item-name", to: :by_item_name
+      map "by-ns", to: :by_ns
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ModifyAlterAdd < Base
+    attribute :position, :string
+    attribute :by_id, :string
+    attribute :title, :modify_alter_add_title
+    attribute :parameter, :parameter, collection: true
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :part, :part, collection: true
+
+    xml do
+      element "add"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "position", to: :position
+      map_attribute "by-id", to: :by_id
+      map_element "title", to: :title
+      map_element "param", to: :parameter
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "part", to: :part
+    end
+
+    key_value do
+      map "position", to: :position
+      map "by-id", to: :by_id
+      map "title", to: :title, render_empty: true
+      map "params", to: :parameter, with: { to: :json_to_asm_parameter_params }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "parts", to: :part, with: { to: :json_to_asm_part_parts }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_parameter_params(instance, doc)
+      current = instance.instance_variable_get(:@parameter)
+      if current.is_a?(Array)
+        doc["params"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Parameter.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["params"] = Oscal::V1_2_1::Parameter.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["params"] = val
+        end
+      end
+    end
+
+    def json_to_asm_part_parts(instance, doc)
+      current = instance.instance_variable_get(:@part)
+      if current.is_a?(Array)
+        doc["parts"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Part.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["parts"] = Oscal::V1_2_1::Part.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["parts"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+  end
+  class SystemImplementationLeveragedAuthorizationTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class SystemInformationInformationTypeTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class SystemInformationInformationTypeDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class SystemInformationInformationTypeCategorization < Base
+    attribute :system, :string
+    attribute :information_type_id, :information_type_id_in_system_information, collection: true
+
+    xml do
+      element "categorization"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "system", to: :system
+      map_element "information-type-id", to: :information_type_id
+    end
+
+    key_value do
+      map "system", to: :system
+      map "information-type-id", to: :information_type_id, render_empty: true
+    end
+  end
+  class ByComponentExportDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ByComponentExportProvided < Base
+    attribute :uuid, :string
+    attribute :description, :by_component_export_provided_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "provided"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_responsible_role_responsible_roles(instance, doc)
+      current = instance.instance_variable_get(:@responsible_role)
+      if current.is_a?(Array)
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-roles"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ByComponentExportResponsibility < Base
+    attribute :uuid, :string
+    attribute :provided_uuid, :string
+    attribute :description, :by_component_export_responsibility_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "responsibility"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_attribute "provided-uuid", to: :provided_uuid
+      map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "provided-uuid", to: :provided_uuid
+      map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_responsible_role_responsible_roles(instance, doc)
+      current = instance.instance_variable_get(:@responsible_role)
+      if current.is_a?(Array)
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-roles"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ByComponentInheritedDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ByComponentSatisfiedDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ActivityStepTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ActivityStepDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ReviewedControlsControlSelectionDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ReviewedControlsControlObjectiveSelectionDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class TaskTimingOnDate < Base
+    attribute :date, :string
+    attribute :remarks, :remarks
+
+    xml do
+      element "on-date"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "date", to: :date
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "date", to: :date
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class TaskTimingWithinDateRange < Base
+    attribute :start, :string
+    attribute :end, :string
+    attribute :remarks, :remarks
+
+    xml do
+      element "within-date-range"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "start", to: :start
+      map_attribute "end", to: :end
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "start", to: :start
+      map "end", to: :end
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class TaskTimingAtFrequency < Base
+    attribute :period, :string
+    attribute :unit, :string
+    attribute :remarks, :remarks
+
+    xml do
+      element "at-frequency"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "period", to: :period
+      map_attribute "unit", to: :unit
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "period", to: :period
+      map "unit", to: :unit
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class AssessmentAssetsAssessmentPlatformTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class AssessmentAssetsAssessmentPlatformUsesComponent < Base
+    attribute :component_uuid, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :responsible_party, :responsible_party, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "uses-component"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "component-uuid", to: :component_uuid
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "responsible-party", to: :responsible_party
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "component-uuid", to: :component_uuid
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "responsible-parties", to: :responsible_party, with: { to: :json_to_asm_responsible_party_responsible_parties }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_responsible_party_responsible_parties(instance, doc)
+      current = instance.instance_variable_get(:@responsible_party)
+      if current.is_a?(Array)
+        doc["responsible-parties"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleParty.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-parties"] = Oscal::V1_2_1::ResponsibleParty.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-parties"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ObservationRelevantEvidenceDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class RiskMitigatingFactorDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class RiskRiskLogEntry < Base
+    attribute :uuid, :string
+    attribute :title, :risk_risk_log_entry_title
+    attribute :description, :risk_risk_log_entry_description
+    attribute :start, :start_in_risk
+    attribute :end, :end_in_risk
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :logged_by, :logged_by, collection: true
+    attribute :risk_status, :risk_status
+    attribute :related_response, :risk_risk_log_entry_related_response, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "entry"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_element "title", to: :title
+      map_element "description", to: :description
+      map_element "start", to: :start
+      map_element "end", to: :end
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "logged-by", to: :logged_by
+      map_element "status-change", to: :risk_status
+      map_element "related-response", to: :related_response
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "title", to: :title, render_empty: true
+      map "description", to: :description, render_empty: true
+      map "start", to: :start, render_empty: true
+      map "end", to: :end, render_empty: true
+      map "status-change", to: :risk_status, with: { to: :json_to_risk_status_status_change, from: :json_from_risk_status_status_change }
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "logged-by", to: :logged_by, with: { to: :json_to_asm_logged_by_logged_by }
+      map "related-responses", to: :related_response, with: { to: :json_to_asm_related_response_related_responses }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_logged_by_logged_by(instance, doc)
+      current = instance.instance_variable_get(:@logged_by)
+      if current.is_a?(Array)
+        doc["logged-by"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LoggedBy.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["logged-by"] = Oscal::V1_2_1::LoggedBy.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["logged-by"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_related_response_related_responses(instance, doc)
+      current = instance.instance_variable_get(:@related_response)
+      if current.is_a?(Array)
+        doc["related-responses"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RiskRiskLogEntryRelatedResponse.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["related-responses"] = Oscal::V1_2_1::RiskRiskLogEntryRelatedResponse.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["related-responses"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def json_from_risk_status_status_change(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::RiskStatus.of_json(v) }
+        instance.instance_variable_set(:@risk_status, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::RiskStatus.new(content: "")
+          instance.instance_variable_set(:@risk_status, inst)
+        else
+          instance.instance_variable_set(:@risk_status, Oscal::V1_2_1::RiskStatus.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@risk_status, Oscal::V1_2_1::RiskStatus.of_json(value))
+      end
+    end
+
+    def json_to_risk_status_status_change(instance, doc)
+      current = instance.instance_variable_get(:@risk_status)
+      if current.is_a?(Array)
+        doc["status-change"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RiskStatus.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["status-change"] = Oscal::V1_2_1::RiskStatus.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["status-change"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ResponseRequiredAssetTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ResponseRequiredAssetDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ResultAssessmentLogEntry < Base
+    attribute :uuid, :string
+    attribute :title, :result_assessment_log_entry_title
+    attribute :description, :result_assessment_log_entry_description
+    attribute :start, :start_in_result
+    attribute :end, :end_in_result
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :logged_by, :logged_by, collection: true
+    attribute :related_task, :related_task, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "entry"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_element "title", to: :title
+      map_element "description", to: :description
+      map_element "start", to: :start
+      map_element "end", to: :end
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "logged-by", to: :logged_by
+      map_element "related-task", to: :related_task
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "title", to: :title, render_empty: true
+      map "description", to: :description, render_empty: true
+      map "start", to: :start, render_empty: true
+      map "end", to: :end, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "logged-by", to: :logged_by, with: { to: :json_to_asm_logged_by_logged_by }
+      map "related-tasks", to: :related_task, with: { to: :json_to_asm_related_task_related_tasks }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_logged_by_logged_by(instance, doc)
+      current = instance.instance_variable_get(:@logged_by)
+      if current.is_a?(Array)
+        doc["logged-by"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LoggedBy.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["logged-by"] = Oscal::V1_2_1::LoggedBy.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["logged-by"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_related_task_related_tasks(instance, doc)
+      current = instance.instance_variable_get(:@related_task)
+      if current.is_a?(Array)
+        doc["related-tasks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RelatedTask.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["related-tasks"] = Oscal::V1_2_1::RelatedTask.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["related-tasks"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class BackMatterResourceCitationText < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "text"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ModifyAlterAddTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ByComponentExportProvidedDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ByComponentExportResponsibilityDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class RiskRiskLogEntryTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class RiskRiskLogEntryDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class RiskRiskLogEntryRelatedResponse < Base
+    attribute :response_uuid, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :related_task, :related_task, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "related-response"
+      namespace Oscal::V1_2_1::Namespace
+      ordered
+      map_attribute "response-uuid", to: :response_uuid
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "related-task", to: :related_task
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "response-uuid", to: :response_uuid
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "related-tasks", to: :related_task, with: { to: :json_to_asm_related_task_related_tasks }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_related_task_related_tasks(instance, doc)
+      current = instance.instance_variable_get(:@related_task)
+      if current.is_a?(Array)
+        doc["related-tasks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RelatedTask.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["related-tasks"] = Oscal::V1_2_1::RelatedTask.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["related-tasks"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class ResultAssessmentLogEntryTitle < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+
+    xml do
+      element "title"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
+  class ResultAssessmentLogEntryDescription < Base
+    attribute :content, :string, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
+    attribute :br, :string, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
+    attribute :hr, :string, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
+
+    xml do
+      element "description"
+      namespace Oscal::V1_2_1::Namespace
+      mixed_content
+      ordered
+      map_content to: :content
+      map_element "a", to: :a
+      map_element "insert", to: :insert
+      map_element "br", to: :br
+      map_element "code", to: :code
+      map_element "em", to: :em
+      map_element "i", to: :i
+      map_element "b", to: :b
+      map_element "strong", to: :strong
+      map_element "sub", to: :sub
+      map_element "sup", to: :sup
+      map_element "q", to: :q
+      map_element "img", to: :img
+      map_element "p", to: :p
+      map_element "h1", to: :h1
+      map_element "h2", to: :h2
+      map_element "h3", to: :h3
+      map_element "h4", to: :h4
+      map_element "h5", to: :h5
+      map_element "h6", to: :h6
+      map_element "ul", to: :ul
+      map_element "ol", to: :ol
+      map_element "pre", to: :pre
+      map_element "hr", to: :hr
+      map_element "blockquote", to: :blockquote
+      map_element "table", to: :table
+    end
+
+    key_value do
+      map "content", to: :content
+      map "a", to: :a
+      map "insert", to: :insert
+      map "br", to: :br
+      map "code", to: :code
+      map "em", to: :em
+      map "i", to: :i
+      map "b", to: :b
+      map "strong", to: :strong
+      map "sub", to: :sub
+      map "sup", to: :sup
+      map "q", to: :q
+      map "img", to: :img
+      map "p", to: :p
+      map "h1", to: :h1
+      map "h2", to: :h2
+      map "h3", to: :h3
+      map "h4", to: :h4
+      map "h5", to: :h5
+      map "h6", to: :h6
+      map "ul", to: :ul
+      map "ol", to: :ol
+      map "pre", to: :pre
+      map "hr", to: :hr
+      map "blockquote", to: :blockquote
+      map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+  end
   class LocationUuid < Base
     attribute :content, :string
 
     xml do
       element "location-uuid"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10077,6 +15090,7 @@ module Oscal::V1_2_1
 
     xml do
       element "party-uuid"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10132,6 +15146,7 @@ module Oscal::V1_2_1
 
     xml do
       element "role-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10188,6 +15203,7 @@ module Oscal::V1_2_1
 
     xml do
       element "hash"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "algorithm", to: :algorithm
     end
@@ -10228,34 +15244,35 @@ module Oscal::V1_2_1
   end
   class Remarks < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "remarks"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -10323,6 +15340,7 @@ module Oscal::V1_2_1
 
     xml do
       element "published"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10369,6 +15387,7 @@ module Oscal::V1_2_1
 
     xml do
       element "last-modified"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10415,6 +15434,7 @@ module Oscal::V1_2_1
 
     xml do
       element "version"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10461,6 +15481,7 @@ module Oscal::V1_2_1
 
     xml do
       element "oscal-version"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10507,6 +15528,7 @@ module Oscal::V1_2_1
 
     xml do
       element "email-address"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10554,6 +15576,7 @@ module Oscal::V1_2_1
 
     xml do
       element "telephone-number"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "type", to: :type
     end
@@ -10597,6 +15620,7 @@ module Oscal::V1_2_1
 
     xml do
       element "addr-line"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10644,6 +15668,7 @@ module Oscal::V1_2_1
 
     xml do
       element "document-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "scheme", to: :scheme
     end
@@ -10678,6 +15703,7 @@ module Oscal::V1_2_1
 
     xml do
       element "parameter-value"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10724,6 +15750,7 @@ module Oscal::V1_2_1
 
     xml do
       element "with-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10771,6 +15798,7 @@ module Oscal::V1_2_1
 
     xml do
       element "coverage"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "generation-method", to: :generation_method
     end
@@ -10805,6 +15833,7 @@ module Oscal::V1_2_1
 
     xml do
       element "percentage"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10848,34 +15877,35 @@ module Oscal::V1_2_1
   end
   class MappingDescription < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "mapping-description"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -10943,6 +15973,7 @@ module Oscal::V1_2_1
 
     xml do
       element "function-performed"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -10990,6 +16021,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "identifier-type", to: :identifier_type
     end
@@ -11024,6 +16056,7 @@ module Oscal::V1_2_1
 
     xml do
       element "base"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -11070,6 +16103,7 @@ module Oscal::V1_2_1
 
     xml do
       element "selected"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -11113,34 +16147,35 @@ module Oscal::V1_2_1
   end
   class AdjustmentJustification < Base
     attribute :content, :string, collection: true
-    attribute :a, Metaschema::AnchorType, collection: true
-    attribute :insert, Metaschema::InsertType, collection: true
+    attribute :a, AnchorType, collection: true
+    attribute :insert, InsertType, collection: true
     attribute :br, :string, collection: true
-    attribute :code, Metaschema::CodeType, collection: true
-    attribute :em, Metaschema::InlineMarkupType, collection: true
-    attribute :i, Metaschema::InlineMarkupType, collection: true
-    attribute :b, Metaschema::InlineMarkupType, collection: true
-    attribute :strong, Metaschema::InlineMarkupType, collection: true
-    attribute :sub, Metaschema::InlineMarkupType, collection: true
-    attribute :sup, Metaschema::InlineMarkupType, collection: true
-    attribute :q, Metaschema::InlineMarkupType, collection: true
-    attribute :img, Metaschema::ImageType, collection: true
-    attribute :p, Metaschema::InlineMarkupType, collection: true
-    attribute :h1, Metaschema::InlineMarkupType, collection: true
-    attribute :h2, Metaschema::InlineMarkupType, collection: true
-    attribute :h3, Metaschema::InlineMarkupType, collection: true
-    attribute :h4, Metaschema::InlineMarkupType, collection: true
-    attribute :h5, Metaschema::InlineMarkupType, collection: true
-    attribute :h6, Metaschema::InlineMarkupType, collection: true
-    attribute :ul, Metaschema::ListType, collection: true
-    attribute :ol, Metaschema::OrderedListType, collection: true
-    attribute :pre, Metaschema::PreformattedType, collection: true
+    attribute :code, CodeType, collection: true
+    attribute :em, InlineMarkupType, collection: true
+    attribute :i, InlineMarkupType, collection: true
+    attribute :b, InlineMarkupType, collection: true
+    attribute :strong, InlineMarkupType, collection: true
+    attribute :sub, InlineMarkupType, collection: true
+    attribute :sup, InlineMarkupType, collection: true
+    attribute :q, InlineMarkupType, collection: true
+    attribute :img, ImageType, collection: true
+    attribute :p, InlineMarkupType, collection: true
+    attribute :h1, InlineMarkupType, collection: true
+    attribute :h2, InlineMarkupType, collection: true
+    attribute :h3, InlineMarkupType, collection: true
+    attribute :h4, InlineMarkupType, collection: true
+    attribute :h5, InlineMarkupType, collection: true
+    attribute :h6, InlineMarkupType, collection: true
+    attribute :ul, ListType, collection: true
+    attribute :ol, OrderedListType, collection: true
+    attribute :pre, PreformattedType, collection: true
     attribute :hr, :string, collection: true
-    attribute :blockquote, Metaschema::BlockQuoteType, collection: true
-    attribute :table, Metaschema::TableType, collection: true
+    attribute :blockquote, BlockQuoteType, collection: true
+    attribute :table, TableType, collection: true
 
     xml do
       element "adjustment-justification"
+      namespace Oscal::V1_2_1::Namespace
       mixed_content
       ordered
       map_content to: :content
@@ -11208,6 +16243,7 @@ module Oscal::V1_2_1
 
     xml do
       element "date-authorized"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -11256,6 +16292,7 @@ module Oscal::V1_2_1
 
     xml do
       element "threat-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "system", to: :system
       map_attribute "href", to: :href
@@ -11292,6 +16329,7 @@ module Oscal::V1_2_1
 
     xml do
       element "risk-status"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
     end
 
@@ -11342,12 +16380,154 @@ module Oscal::V1_2_1
       validator.validate(self, self.class.metaschema_constraints)
     end
   end
+  class ShortNameInMetadata < Base
+    attribute :content, :string
+
+    xml do
+      element "short-name"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class UrlInMetadata < Base
+    attribute :content, :string
+
+    xml do
+      element "url"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class NameInMetadata < Base
+    attribute :content, :string
+
+    xml do
+      element "name"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
   class ExternalIdInMetadata < Base
     attribute :content, :string
     attribute :scheme, :string
 
     xml do
       element "external-id"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "scheme", to: :scheme
     end
@@ -11377,6 +16557,53 @@ module Oscal::V1_2_1
       new(content: data)
     end
   end
+  class MemberOfOrganizationInMetadata < Base
+    attribute :content, :string
+
+    xml do
+      element "member-of-organization"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
   class Base64InBackMatter < Base
     attribute :content, :string
     attribute :filename, :string
@@ -11384,6 +16611,7 @@ module Oscal::V1_2_1
 
     xml do
       element "base64"
+      namespace Oscal::V1_2_1::Namespace
       map_content to: :content
       map_attribute "filename", to: :filename
       map_attribute "media-type", to: :media_type
@@ -11415,6 +16643,1322 @@ module Oscal::V1_2_1
       new(content: data)
     end
   end
+  class CityInAddress < Base
+    attribute :content, :string
+
+    xml do
+      element "city"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class StateInAddress < Base
+    attribute :content, :string
+
+    xml do
+      element "state"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class PostalCodeInAddress < Base
+    attribute :content, :string
+
+    xml do
+      element "postal-code"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class CountryInAddress < Base
+    attribute :content, :string
+
+    xml do
+      element "country"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ExpressionInParameterConstraint < Base
+    attribute :content, :string
+
+    xml do
+      element "expression"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class RelationshipInMap < Base
+    attribute :content, :string
+
+    xml do
+      element "relationship"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "type", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class CategoryInConfidenceScore < Base
+    attribute :content, :string
+
+    xml do
+      element "category"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class AsIsInMerge < Base
+    attribute :content, :string
+
+    xml do
+      element "as-is"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ShortNameInSystemUser < Base
+    attribute :content, :string
+
+    xml do
+      element "short-name"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ValueInSetParameter < Base
+    attribute :content, :string
+
+    xml do
+      element "value"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SystemNameInSystemCharacteristics < Base
+    attribute :content, :string
+
+    xml do
+      element "system-name"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SystemNameShortInSystemCharacteristics < Base
+    attribute :content, :string
+
+    xml do
+      element "system-name-short"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SecuritySensitivityLevelInSystemCharacteristics < Base
+    attribute :content, :string
+
+    xml do
+      element "security-sensitivity-level"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class InformationTypeIdInSystemInformation < Base
+    attribute :content, :string
+
+    xml do
+      element "information-type-id"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "id", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SecurityObjectiveConfidentialityInSecurityImpactLevel < Base
+    attribute :content, :string
+
+    xml do
+      element "security-objective-confidentiality"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SecurityObjectiveIntegrityInSecurityImpactLevel < Base
+    attribute :content, :string
+
+    xml do
+      element "security-objective-integrity"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class SecurityObjectiveAvailabilityInSecurityImpactLevel < Base
+    attribute :content, :string
+
+    xml do
+      element "security-objective-availability"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class PartyUuidInSystemImplementation < Base
+    attribute :content, :string
+
+    xml do
+      element "party-uuid"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ImplementationStatementUuidInFinding < Base
+    attribute :content, :string
+
+    xml do
+      element "implementation-statement-uuid"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class MethodInObservation < Base
+    attribute :content, :string
+
+    xml do
+      element "method"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class TypeInObservation < Base
+    attribute :content, :string
+
+    xml do
+      element "type"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class CollectedInObservation < Base
+    attribute :content, :string
+
+    xml do
+      element "collected"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class ExpiresInObservation < Base
+    attribute :content, :string
+
+    xml do
+      element "expires"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class DeadlineInRisk < Base
+    attribute :content, :string
+
+    xml do
+      element "deadline"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class StartInRisk < Base
+    attribute :content, :string
+
+    xml do
+      element "start"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class EndInRisk < Base
+    attribute :content, :string
+
+    xml do
+      element "end"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class StartInResult < Base
+    attribute :content, :string
+
+    xml do
+      element "start"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
+  class EndInResult < Base
+    attribute :content, :string
+
+    xml do
+      element "end"
+      namespace Oscal::V1_2_1::Namespace
+      map_content to: :content
+    end
+
+    key_value do
+      map "STRVALUE", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+  end
   class Metadata < Base
     attribute :title, :metadata_title
     attribute :published, :published
@@ -11434,6 +17978,7 @@ module Oscal::V1_2_1
 
     xml do
       element "metadata"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "title", to: :title
       map_element "published", to: :published
@@ -11706,6 +18251,7 @@ module Oscal::V1_2_1
 
     xml do
       element "property"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "name", to: :name
       map_attribute "uuid", to: :uuid
@@ -11780,6 +18326,7 @@ module Oscal::V1_2_1
 
     xml do
       element "link"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_attribute "rel", to: :rel
@@ -11826,17 +18373,18 @@ module Oscal::V1_2_1
     end
   end
   class Address < Base
-    attribute :location_type, :string
+    attribute :type, :string
     attribute :addr_line, :addr_line, collection: true
-    attribute :city, :string
-    attribute :state, :string
-    attribute :postal_code, :string
-    attribute :country, :string
+    attribute :city, :city_in_address
+    attribute :state, :state_in_address
+    attribute :postal_code, :postal_code_in_address
+    attribute :country, :country_in_address
 
     xml do
       element "address"
+      namespace Oscal::V1_2_1::Namespace
       ordered
-      map_attribute "location-type", to: :location_type
+      map_attribute "type", to: :type
       map_element "addr-line", to: :addr_line
       map_element "city", to: :city
       map_element "state", to: :state
@@ -11845,7 +18393,7 @@ module Oscal::V1_2_1
     end
 
     key_value do
-      map "location-type", to: :location_type
+      map "type", to: :type
       map "addr-lines", to: :addr_line, with: { to: :json_to_addr_line_addr_lines, from: :json_from_addr_line_addr_lines }
       map "city", to: :city, render_empty: true
       map "state", to: :state, render_empty: true
@@ -11894,6 +18442,7 @@ module Oscal::V1_2_1
 
     xml do
       element "responsible-party"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "role-id", to: :role_id
       map_element "party-uuid", to: :party_uuid
@@ -11999,6 +18548,7 @@ module Oscal::V1_2_1
 
     xml do
       element "action"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "date", to: :date
@@ -12071,6 +18621,7 @@ module Oscal::V1_2_1
 
     xml do
       element "back-matter"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "resource", to: :resource
     end
@@ -12097,6 +18648,7 @@ module Oscal::V1_2_1
 
     xml do
       element "responsible-role"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "role-id", to: :role_id
       map_element "prop", to: :property
@@ -12194,6 +18746,7 @@ module Oscal::V1_2_1
 
     xml do
       element "part"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "id", to: :id
       map_attribute "name", to: :name
@@ -12201,9 +18754,33 @@ module Oscal::V1_2_1
       map_attribute "class", to: :class_attr
       map_element "title", to: :title
       map_element "prop", to: :property
-      map_element "prose", to: :prose
       map_element "part", to: :part
       map_element "link", to: :link
+      map_element "a", to: :a, delegate: :prose
+      map_element "insert", to: :insert, delegate: :prose
+      map_element "br", to: :br, delegate: :prose
+      map_element "code", to: :code, delegate: :prose
+      map_element "em", to: :em, delegate: :prose
+      map_element "i", to: :i, delegate: :prose
+      map_element "b", to: :b, delegate: :prose
+      map_element "strong", to: :strong, delegate: :prose
+      map_element "sub", to: :sub, delegate: :prose
+      map_element "sup", to: :sup, delegate: :prose
+      map_element "q", to: :q, delegate: :prose
+      map_element "img", to: :img, delegate: :prose
+      map_element "p", to: :p, delegate: :prose
+      map_element "h1", to: :h1, delegate: :prose
+      map_element "h2", to: :h2, delegate: :prose
+      map_element "h3", to: :h3, delegate: :prose
+      map_element "h4", to: :h4, delegate: :prose
+      map_element "h5", to: :h5, delegate: :prose
+      map_element "h6", to: :h6, delegate: :prose
+      map_element "ul", to: :ul, delegate: :prose
+      map_element "ol", to: :ol, delegate: :prose
+      map_element "pre", to: :pre, delegate: :prose
+      map_element "hr", to: :hr, delegate: :prose
+      map_element "blockquote", to: :blockquote, delegate: :prose
+      map_element "table", to: :table, delegate: :prose
     end
 
     key_value do
@@ -12283,6 +18860,7 @@ module Oscal::V1_2_1
 
     xml do
       element "parameter"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "id", to: :id
       map_attribute "class", to: :class_attr
@@ -12460,6 +19038,7 @@ module Oscal::V1_2_1
 
     xml do
       element "parameter-constraint"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "test", to: :test
@@ -12495,8 +19074,33 @@ module Oscal::V1_2_1
 
     xml do
       element "parameter-guideline"
+      namespace Oscal::V1_2_1::Namespace
       ordered
-      map_element "prose", to: :prose
+      map_element "a", to: :a, delegate: :prose
+      map_element "insert", to: :insert, delegate: :prose
+      map_element "br", to: :br, delegate: :prose
+      map_element "code", to: :code, delegate: :prose
+      map_element "em", to: :em, delegate: :prose
+      map_element "i", to: :i, delegate: :prose
+      map_element "b", to: :b, delegate: :prose
+      map_element "strong", to: :strong, delegate: :prose
+      map_element "sub", to: :sub, delegate: :prose
+      map_element "sup", to: :sup, delegate: :prose
+      map_element "q", to: :q, delegate: :prose
+      map_element "img", to: :img, delegate: :prose
+      map_element "p", to: :p, delegate: :prose
+      map_element "h1", to: :h1, delegate: :prose
+      map_element "h2", to: :h2, delegate: :prose
+      map_element "h3", to: :h3, delegate: :prose
+      map_element "h4", to: :h4, delegate: :prose
+      map_element "h5", to: :h5, delegate: :prose
+      map_element "h6", to: :h6, delegate: :prose
+      map_element "ul", to: :ul, delegate: :prose
+      map_element "ol", to: :ol, delegate: :prose
+      map_element "pre", to: :pre, delegate: :prose
+      map_element "hr", to: :hr, delegate: :prose
+      map_element "blockquote", to: :blockquote, delegate: :prose
+      map_element "table", to: :table, delegate: :prose
     end
 
     key_value do
@@ -12529,6 +19133,7 @@ module Oscal::V1_2_1
 
     xml do
       element "parameter-selection"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "how-many", to: :how_many
       map_element "choice", to: :choice
@@ -12574,6 +19179,7 @@ module Oscal::V1_2_1
 
     xml do
       element "include-all"
+      namespace Oscal::V1_2_1::Namespace
       ordered
     end
   end
@@ -12583,6 +19189,7 @@ module Oscal::V1_2_1
 
     xml do
       element "matching"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "pattern", to: :pattern
       map_element "remarks", to: :remarks
@@ -12636,6 +19243,7 @@ module Oscal::V1_2_1
 
     xml do
       element "select-control-by-id"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "with-child-controls", to: :with_child_controls
       map_element "with-id", to: :with_id
@@ -12690,6 +19298,7 @@ module Oscal::V1_2_1
 
     xml do
       element "catalog"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -12816,6 +19425,7 @@ module Oscal::V1_2_1
 
     xml do
       element "control"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "id", to: :id
       map_attribute "class", to: :class_attr
@@ -12880,6 +19490,7 @@ module Oscal::V1_2_1
 
     xml do
       element "group"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "id", to: :id
       map_attribute "class", to: :class_attr
@@ -12950,6 +19561,7 @@ module Oscal::V1_2_1
 
     xml do
       element "mapping"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "method", to: :method_attr
@@ -13216,6 +19828,7 @@ module Oscal::V1_2_1
 
     xml do
       element "mapping-resource-reference"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "ns", to: :ns
       map_attribute "type", to: :type
@@ -13274,7 +19887,7 @@ module Oscal::V1_2_1
     attribute :uuid, :string
     attribute :ns, :string
     attribute :matching_rationale, :string
-    attribute :relationship, :string
+    attribute :relationship, :relationship_in_map
     attribute :mapping_item, :mapping_item, collection: true
     attribute :qualifier_item, :qualifier_item, collection: true
     attribute :confidence_score, :confidence_score
@@ -13285,6 +19898,7 @@ module Oscal::V1_2_1
 
     xml do
       element "map"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "ns", to: :ns
@@ -13410,7 +20024,13 @@ module Oscal::V1_2_1
               when String then [value]
               else return
               end
-      parsed = items.map { |item| item.is_a?(Hash) ? item : item }
+      parsed = items.map do |item|
+        case item
+        when Hash then Oscal::V1_2_1::RelationshipInMap.of_json(item)
+        when String then Oscal::V1_2_1::RelationshipInMap.of_json(item)
+        else item
+        end
+      end
       instance.instance_variable_set(:@relationship, parsed)
     end
 
@@ -13418,7 +20038,11 @@ module Oscal::V1_2_1
       current = instance.instance_variable_get(:@relationship)
       if current.is_a?(Array)
         result = current.map do |item|
-          item.respond_to?(:to_h) ? item.to_h : item
+          if item.is_a?(Lutaml::Model::Serializable)
+            Oscal::V1_2_1::RelationshipInMap.as_json(item)
+          else
+            item
+          end
         end
         doc["relationship"] = result.length == 1 ? result.first : result
       end
@@ -13434,6 +20058,7 @@ module Oscal::V1_2_1
 
     xml do
       element "gap-summary"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "unmapped-controls", to: :select_control_by_id
@@ -13450,10 +20075,11 @@ module Oscal::V1_2_1
   end
   class ConfidenceScore < Base
     attribute :percentage, :percentage
-    attribute :category, :string
+    attribute :category, :category_in_confidence_score
 
     xml do
       element "confidence-score"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "percentage", to: :percentage
       map_element "category", to: :category
@@ -13505,6 +20131,7 @@ module Oscal::V1_2_1
 
     xml do
       element "mapping-item"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "type", to: :type
       map_attribute "id-ref", to: :id_ref
@@ -13566,6 +20193,7 @@ module Oscal::V1_2_1
 
     xml do
       element "qualifier-item"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "subject", to: :subject
       map_attribute "predicate", to: :predicate
@@ -13652,6 +20280,7 @@ module Oscal::V1_2_1
 
     xml do
       element "mapping-provenance"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "method", to: :method_attr
       map_attribute "matching-rationale", to: :matching_rationale
@@ -13811,6 +20440,7 @@ module Oscal::V1_2_1
 
     xml do
       element "mapping-collection"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -13972,6 +20602,7 @@ module Oscal::V1_2_1
 
     xml do
       element "profile"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -14132,6 +20763,7 @@ module Oscal::V1_2_1
 
     xml do
       element "import"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "include-all", to: :include_all
@@ -14174,10 +20806,11 @@ module Oscal::V1_2_1
     attribute :combine, :merge_combine
     attribute :flat, :merge_flat
     attribute :custom, :merge_custom
-    attribute :as_is, :string
+    attribute :as_is, :as_is_in_merge
 
     xml do
       element "merge"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "combine", to: :combine
       map_element "as-is", to: :as_is
@@ -14270,6 +20903,7 @@ module Oscal::V1_2_1
 
     xml do
       element "modify"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "set-parameter", to: :set_parameter
       map_element "alter", to: :alter
@@ -14296,6 +20930,7 @@ module Oscal::V1_2_1
 
     xml do
       element "insert-controls"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "order", to: :order
       map_element "include-all", to: :include_all
@@ -14336,7 +20971,7 @@ module Oscal::V1_2_1
   end
   class SystemComponent < Base
     attribute :uuid, :string
-    attribute :system_component_type, :string
+    attribute :type, :string
     attribute :title, :system_component_title
     attribute :description, :system_component_description
     attribute :purpose, :system_component_purpose
@@ -14349,9 +20984,10 @@ module Oscal::V1_2_1
 
     xml do
       element "system-component"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
-      map_attribute "system-component-type", to: :system_component_type
+      map_attribute "type", to: :type
       map_element "title", to: :title
       map_element "description", to: :description
       map_element "purpose", to: :purpose
@@ -14365,7 +21001,7 @@ module Oscal::V1_2_1
 
     key_value do
       map "uuid", to: :uuid
-      map "system-component-type", to: :system_component_type
+      map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
@@ -14514,6 +21150,7 @@ module Oscal::V1_2_1
 
     xml do
       element "protocol"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "name", to: :name
@@ -14565,6 +21202,7 @@ module Oscal::V1_2_1
 
     xml do
       element "port-range"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "start", to: :start
       map_attribute "end", to: :end
@@ -14630,6 +21268,7 @@ module Oscal::V1_2_1
 
     xml do
       element "implementation-status"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "state", to: :state
       map_element "remarks", to: :remarks
@@ -14679,7 +21318,7 @@ module Oscal::V1_2_1
   class SystemUser < Base
     attribute :uuid, :string
     attribute :title, :system_user_title
-    attribute :short_name, :string
+    attribute :short_name, :short_name_in_system_user
     attribute :description, :system_user_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
@@ -14689,6 +21328,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-user"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -14837,6 +21477,7 @@ module Oscal::V1_2_1
 
     xml do
       element "authorized-privilege"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "title", to: :title
       map_element "description", to: :description
@@ -14936,6 +21577,7 @@ module Oscal::V1_2_1
 
     xml do
       element "inventory-item"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "description", to: :description
@@ -15023,11 +21665,12 @@ module Oscal::V1_2_1
   end
   class SetParameter < Base
     attribute :param_id, :string
-    attribute :value, :string, collection: true
+    attribute :value, :value_in_set_parameter, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "set-parameter"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "param-id", to: :param_id
       map_element "value", to: :value
@@ -15086,6 +21729,7 @@ module Oscal::V1_2_1
 
     xml do
       element "component-definition"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -15206,6 +21850,7 @@ module Oscal::V1_2_1
 
     xml do
       element "import-component-definition"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "remarks", to: :remarks
@@ -15254,7 +21899,7 @@ module Oscal::V1_2_1
   end
   class DefinedComponent < Base
     attribute :uuid, :string
-    attribute :defined_component_type, :string
+    attribute :type, :string
     attribute :title, :defined_component_title
     attribute :description, :defined_component_description
     attribute :purpose, :defined_component_purpose
@@ -15267,9 +21912,10 @@ module Oscal::V1_2_1
 
     xml do
       element "defined-component"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
-      map_attribute "defined-component-type", to: :defined_component_type
+      map_attribute "type", to: :type
       map_element "title", to: :title
       map_element "description", to: :description
       map_element "purpose", to: :purpose
@@ -15283,7 +21929,7 @@ module Oscal::V1_2_1
 
     key_value do
       map "uuid", to: :uuid
-      map "defined-component-type", to: :defined_component_type
+      map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
@@ -15412,6 +22058,7 @@ module Oscal::V1_2_1
 
     xml do
       element "capability"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "name", to: :name
@@ -15510,6 +22157,7 @@ module Oscal::V1_2_1
 
     xml do
       element "control-implementation"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "source", to: :source
@@ -15569,6 +22217,7 @@ module Oscal::V1_2_1
 
     xml do
       element "incorporates-component"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "component-uuid", to: :component_uuid
       map_element "description", to: :description
@@ -15612,6 +22261,7 @@ module Oscal::V1_2_1
 
     xml do
       element "implemented-requirement"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "control-id", to: :control_id
@@ -15712,6 +22362,7 @@ module Oscal::V1_2_1
 
     xml do
       element "statement"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "statement-id", to: :statement_id
@@ -15808,6 +22459,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-security-plan"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -16026,6 +22678,7 @@ module Oscal::V1_2_1
 
     xml do
       element "import-profile"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "remarks", to: :remarks
@@ -16074,13 +22727,13 @@ module Oscal::V1_2_1
   end
   class SystemCharacteristics < Base
     attribute :system_id, :system_id, collection: true
-    attribute :system_name, :string
-    attribute :system_name_short, :string
+    attribute :system_name, :system_name_in_system_characteristics
+    attribute :system_name_short, :system_name_short_in_system_characteristics
     attribute :description, :system_characteristics_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :date_authorized, :date_authorized
-    attribute :security_sensitivity_level, :string
+    attribute :security_sensitivity_level, :security_sensitivity_level_in_system_characteristics
     attribute :system_information, :system_information
     attribute :security_impact_level, :security_impact_level
     attribute :status, :status
@@ -16092,6 +22745,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-characteristics"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "system-id", to: :system_id
       map_element "system-name", to: :system_name
@@ -16414,6 +23068,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-implementation"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "prop", to: :property
       map_element "link", to: :link
@@ -16486,6 +23141,7 @@ module Oscal::V1_2_1
 
     xml do
       element "system-information"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "prop", to: :property
       map_element "link", to: :link
@@ -16508,12 +23164,13 @@ module Oscal::V1_2_1
     end
   end
   class SecurityImpactLevel < Base
-    attribute :security_objective_confidentiality, :string
-    attribute :security_objective_integrity, :string
-    attribute :security_objective_availability, :string
+    attribute :security_objective_confidentiality, :security_objective_confidentiality_in_security_impact_level
+    attribute :security_objective_integrity, :security_objective_integrity_in_security_impact_level
+    attribute :security_objective_availability, :security_objective_availability_in_security_impact_level
 
     xml do
       element "security-impact-level"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "security-objective-confidentiality", to: :security_objective_confidentiality
       map_element "security-objective-integrity", to: :security_objective_integrity
@@ -16532,6 +23189,7 @@ module Oscal::V1_2_1
 
     xml do
       element "status"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "state", to: :state
       map_element "remarks", to: :remarks
@@ -16587,6 +23245,7 @@ module Oscal::V1_2_1
 
     xml do
       element "authorization-boundary"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -16677,6 +23336,7 @@ module Oscal::V1_2_1
 
     xml do
       element "network-architecture"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -16767,6 +23427,7 @@ module Oscal::V1_2_1
 
     xml do
       element "data-flow"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -16857,6 +23518,7 @@ module Oscal::V1_2_1
 
     xml do
       element "impact"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "prop", to: :property
       map_element "link", to: :link
@@ -16983,6 +23645,7 @@ module Oscal::V1_2_1
 
     xml do
       element "diagram"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "description", to: :description
@@ -17102,6 +23765,7 @@ module Oscal::V1_2_1
 
     xml do
       element "by-component"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "component-uuid", to: :component_uuid
       map_attribute "uuid", to: :uuid
@@ -17251,6 +23915,7 @@ module Oscal::V1_2_1
 
     xml do
       element "import-ssp"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "remarks", to: :remarks
@@ -17307,6 +23972,7 @@ module Oscal::V1_2_1
 
     xml do
       element "local-objective"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "control-id", to: :control_id
       map_element "description", to: :description
@@ -17400,6 +24066,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-method"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "description", to: :description
@@ -17511,6 +24178,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-part"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "name", to: :name
@@ -17518,9 +24186,33 @@ module Oscal::V1_2_1
       map_attribute "class", to: :class_attr
       map_element "title", to: :title
       map_element "prop", to: :property
-      map_element "prose", to: :prose
       map_element "part", to: :assessment_part
       map_element "link", to: :link
+      map_element "a", to: :a, delegate: :prose
+      map_element "insert", to: :insert, delegate: :prose
+      map_element "br", to: :br, delegate: :prose
+      map_element "code", to: :code, delegate: :prose
+      map_element "em", to: :em, delegate: :prose
+      map_element "i", to: :i, delegate: :prose
+      map_element "b", to: :b, delegate: :prose
+      map_element "strong", to: :strong, delegate: :prose
+      map_element "sub", to: :sub, delegate: :prose
+      map_element "sup", to: :sup, delegate: :prose
+      map_element "q", to: :q, delegate: :prose
+      map_element "img", to: :img, delegate: :prose
+      map_element "p", to: :p, delegate: :prose
+      map_element "h1", to: :h1, delegate: :prose
+      map_element "h2", to: :h2, delegate: :prose
+      map_element "h3", to: :h3, delegate: :prose
+      map_element "h4", to: :h4, delegate: :prose
+      map_element "h5", to: :h5, delegate: :prose
+      map_element "h6", to: :h6, delegate: :prose
+      map_element "ul", to: :ul, delegate: :prose
+      map_element "ol", to: :ol, delegate: :prose
+      map_element "pre", to: :pre, delegate: :prose
+      map_element "hr", to: :hr, delegate: :prose
+      map_element "blockquote", to: :blockquote, delegate: :prose
+      map_element "table", to: :table, delegate: :prose
     end
 
     key_value do
@@ -17597,6 +24289,7 @@ module Oscal::V1_2_1
 
     xml do
       element "activity"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -17740,6 +24433,7 @@ module Oscal::V1_2_1
 
     xml do
       element "reviewed-controls"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "description", to: :description
       map_element "prop", to: :property
@@ -17831,6 +24525,7 @@ module Oscal::V1_2_1
 
     xml do
       element "task"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "type", to: :type
@@ -17974,6 +24669,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-subject"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "type", to: :type
       map_element "description", to: :description
@@ -18082,6 +24778,7 @@ module Oscal::V1_2_1
 
     xml do
       element "select-objective-by-id"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "objective-id", to: :objective_id
       map_element "remarks", to: :remarks
@@ -18138,6 +24835,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-subject-placeholder"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "description", to: :description
@@ -18214,16 +24912,17 @@ module Oscal::V1_2_1
   end
   class SelectSubjectById < Base
     attribute :subject_uuid, :string
-    attribute :subject_type, :string
+    attribute :type, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "select-subject-by-id"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "subject-uuid", to: :subject_uuid
-      map_attribute "subject-type", to: :subject_type
+      map_attribute "type", to: :type
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "remarks", to: :remarks
@@ -18231,7 +24930,7 @@ module Oscal::V1_2_1
 
     key_value do
       map "subject-uuid", to: :subject_uuid
-      map "subject-type", to: :subject_type
+      map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
@@ -18275,7 +24974,7 @@ module Oscal::V1_2_1
   end
   class SubjectReference < Base
     attribute :subject_uuid, :string
-    attribute :subject_type, :string
+    attribute :type, :string
     attribute :title, :subject_reference_title
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
@@ -18283,9 +24982,10 @@ module Oscal::V1_2_1
 
     xml do
       element "subject-reference"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "subject-uuid", to: :subject_uuid
-      map_attribute "subject-type", to: :subject_type
+      map_attribute "type", to: :type
       map_element "title", to: :title
       map_element "prop", to: :property
       map_element "link", to: :link
@@ -18294,7 +24994,7 @@ module Oscal::V1_2_1
 
     key_value do
       map "subject-uuid", to: :subject_uuid
-      map "subject-type", to: :subject_type
+      map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "props", to: :property, render_empty: true
@@ -18363,6 +25063,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-assets"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "component", to: :system_component
       map_element "assessment-platform", to: :assessment_platform
@@ -18395,6 +25096,7 @@ module Oscal::V1_2_1
 
     xml do
       element "finding-target"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "type", to: :type
       map_attribute "target-id", to: :target_id
@@ -18551,13 +25253,14 @@ module Oscal::V1_2_1
     attribute :link, :link, collection: true
     attribute :origin, :origin, collection: true
     attribute :finding_target, :finding_target
-    attribute :implementation_statement_uuid, :string
+    attribute :implementation_statement_uuid, :implementation_statement_uuid_in_finding
     attribute :related_observation, :related_observation, collection: true
     attribute :associated_risk, :associated_risk, collection: true
     attribute :remarks, :remarks
 
     xml do
       element "finding"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -18692,6 +25395,7 @@ module Oscal::V1_2_1
 
     xml do
       element "origin"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "actor", to: :origin_actor
       map_element "related-task", to: :related_task
@@ -18712,6 +25416,7 @@ module Oscal::V1_2_1
 
     xml do
       element "related-observation"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "observation-uuid", to: :observation_uuid
       map_element "remarks", to: :remarks
@@ -18764,6 +25469,7 @@ module Oscal::V1_2_1
 
     xml do
       element "associated-risk"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "risk-uuid", to: :risk_uuid
       map_element "remarks", to: :remarks
@@ -18816,17 +25522,18 @@ module Oscal::V1_2_1
     attribute :description, :observation_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :method_attr, :string, collection: true
-    attribute :type, :string, collection: true
+    attribute :method_attr, :method_in_observation, collection: true
+    attribute :type, :type_in_observation, collection: true
     attribute :origin, :origin, collection: true
     attribute :subject_reference, :subject_reference, collection: true
     attribute :relevant_evidence, :observation_relevant_evidence, collection: true
-    attribute :collected, :string
-    attribute :expires, :string
+    attribute :collected, :collected_in_observation
+    attribute :expires, :expires_in_observation
     attribute :remarks, :remarks
 
     xml do
       element "observation"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -18944,6 +25651,7 @@ module Oscal::V1_2_1
 
     xml do
       element "origin-actor"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "type", to: :type
       map_attribute "actor-uuid", to: :actor_uuid
@@ -18971,6 +25679,7 @@ module Oscal::V1_2_1
 
     xml do
       element "related-task"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "task-uuid", to: :task_uuid
       map_element "prop", to: :property
@@ -19072,13 +25781,14 @@ module Oscal::V1_2_1
     attribute :threat_id, :threat_id, collection: true
     attribute :characterization, :characterization, collection: true
     attribute :mitigating_factor, :risk_mitigating_factor, collection: true
-    attribute :deadline, :string
+    attribute :deadline, :deadline_in_risk
     attribute :response, :response, collection: true
     attribute :risk_log, :risk_risk_log
     attribute :related_observation, :related_observation, collection: true
 
     xml do
       element "risk"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -19284,6 +25994,7 @@ module Oscal::V1_2_1
 
     xml do
       element "characterization"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "prop", to: :property
       map_element "link", to: :link
@@ -19340,6 +26051,7 @@ module Oscal::V1_2_1
 
     xml do
       element "response"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "lifecycle", to: :lifecycle
@@ -19458,6 +26170,7 @@ module Oscal::V1_2_1
 
     xml do
       element "logged-by"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "party-uuid", to: :party_uuid
       map_attribute "role-id", to: :role_id
@@ -19520,6 +26233,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-plan"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -19763,6 +26477,7 @@ module Oscal::V1_2_1
 
     xml do
       element "assessment-results"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -19922,6 +26637,7 @@ module Oscal::V1_2_1
 
     xml do
       element "import-ap"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "href", to: :href
       map_element "remarks", to: :remarks
@@ -19972,8 +26688,8 @@ module Oscal::V1_2_1
     attribute :uuid, :string
     attribute :title, :result_title
     attribute :description, :result_description
-    attribute :start, :string
-    attribute :end, :string
+    attribute :start, :result_start
+    attribute :end, :result_end
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :local_definitions, :result_local_definitions
@@ -19987,6 +26703,7 @@ module Oscal::V1_2_1
 
     xml do
       element "result"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title
@@ -20185,6 +26902,7 @@ module Oscal::V1_2_1
 
     xml do
       element "plan-of-action-and-milestones"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
@@ -20386,6 +27104,7 @@ module Oscal::V1_2_1
 
     xml do
       element "local-definitions"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
@@ -20483,6 +27202,7 @@ module Oscal::V1_2_1
 
     xml do
       element "poam-item"
+      namespace Oscal::V1_2_1::Namespace
       ordered
       map_attribute "uuid", to: :uuid
       map_element "title", to: :title

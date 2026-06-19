@@ -39,6 +39,10 @@ RSpec.shared_examples "cross-format XML to JSON to YAML to XML" do |model_class|
     from_yaml = model_class.from_yaml(yaml_out)
     xml_final = model_class.to_xml(from_yaml)
 
-    expect(xml_final).to be_xml_equivalent_to(source_xml)
+    # XML comments cannot survive a JSON/YAML hop (neither format models them),
+    # so they are non-normative for a cross-format round-trip; every other
+    # dimension stays strict.
+    expect(xml_final)
+      .to be_xml_equivalent_to(source_xml).with_match(comments: :ignore)
   end
 end
