@@ -56,67 +56,97 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class MetadataRevision < Base
+    attribute :title, :string
     attribute :published, :published
     attribute :last_modified, :last_modified
     attribute :version, :version
     attribute :oscal_version, :oscal_version
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :string
+    attribute :remarks, :remarks
 
     xml do
       element "revision"
       ordered
+      map_element "title", to: :title
       map_element "published", to: :published
       map_element "last-modified", to: :last_modified
       map_element "version", to: :version
       map_element "oscal-version", to: :oscal_version
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "title", to: :title
+      map_element "remarks", to: :remarks
     end
 
     key_value do
+      map "title", to: :title, render_empty: true
       map "published", to: :published, with: { to: :json_to_published_published, from: :json_from_published_published }
       map "last-modified", to: :last_modified, with: { to: :json_to_last_modified_last_modified, from: :json_from_last_modified_last_modified }
       map "version", to: :version, with: { to: :json_to_version_version, from: :json_from_version_version }
       map "oscal-version", to: :oscal_version, with: { to: :json_to_oscal_version_oscal_version, from: :json_from_oscal_version_oscal_version }
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
     end
 
-    def json_from_published_published(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Published.of_json(v) }
-        instance.instance_variable_set(:@published, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Published.new(content: "")
-          instance.instance_variable_set(:@published, inst)
-        else
-          instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
         end
-      elsif value
-        instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
       end
     end
 
-    def json_to_published_published(instance, doc)
-      current = instance.instance_variable_get(:@published)
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["published"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["published"] = Oscal::V1_2_1::Published.as_json(current)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["published"] = val
+          doc["props"] = val
         end
       end
     end
@@ -140,43 +170,15 @@ module Oscal::V1_2_1
     def json_to_last_modified_last_modified(instance, doc)
       current = instance.instance_variable_get(:@last_modified)
       if current.is_a?(Array)
-        doc["last-modified"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["last-modified"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LastModified.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["last-modified"] = Oscal::V1_2_1::LastModified.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["last-modified"] = val
-        end
-      end
-    end
-
-    def json_from_version_version(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Version.of_json(v) }
-        instance.instance_variable_set(:@version, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Version.new(content: "")
-          instance.instance_variable_set(:@version, inst)
-        else
-          instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
-      end
-    end
-
-    def json_to_version_version(instance, doc)
-      current = instance.instance_variable_get(:@version)
-      if current.is_a?(Array)
-        doc["version"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["version"] = Oscal::V1_2_1::Version.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["version"] = val
         end
       end
     end
@@ -200,7 +202,9 @@ module Oscal::V1_2_1
     def json_to_oscal_version_oscal_version(instance, doc)
       current = instance.instance_variable_get(:@oscal_version)
       if current.is_a?(Array)
-        doc["oscal-version"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["oscal-version"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::OscalVersion.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["oscal-version"] = Oscal::V1_2_1::OscalVersion.as_json(current)
@@ -211,6 +215,38 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_from_published_published(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Published.of_json(v) }
+        instance.instance_variable_set(:@published, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Published.new(content: "")
+          instance.instance_variable_set(:@published, inst)
+        else
+          instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+      end
+    end
+
+    def json_to_published_published(instance, doc)
+      current = instance.instance_variable_get(:@published)
+      if current.is_a?(Array)
+        doc["published"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Published.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["published"] = Oscal::V1_2_1::Published.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["published"] = val
+        end
+      end
+    end
+
     def json_from_remarks_remarks(instance, value)
       if value.is_a?(Array)
         parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
@@ -230,7 +266,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -241,30 +279,34 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+    def json_from_version_version(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Version.of_json(v) }
+        instance.instance_variable_set(:@version, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Version.new(content: "")
+          instance.instance_variable_set(:@version, inst)
         else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
+          instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
         end
+      elsif value
+        instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
       end
     end
 
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
+    def json_to_version_version(instance, doc)
+      current = instance.instance_variable_get(:@version)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["version"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Version.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+          doc["version"] = Oscal::V1_2_1::Version.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
+          doc["version"] = val
         end
       end
     end
@@ -275,33 +317,65 @@ module Oscal::V1_2_1
   end
   class MetadataRole < Base
     attribute :id, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
     attribute :title, :string
     attribute :short_name, :string
     attribute :description, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "role"
       ordered
       map_attribute "id", to: :id
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
       map_element "title", to: :title
       map_element "short-name", to: :short_name
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "id", to: :id
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
       map "short-name", to: :short_name, render_empty: true
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -323,41 +397,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -368,81 +416,53 @@ module Oscal::V1_2_1
   end
   class MetadataLocation < Base
     attribute :uuid, :string
+    attribute :title, :string
+    attribute :address, :address
     attribute :email_address, :email_address, collection: true
     attribute :telephone_number, :telephone_number, collection: true
-    attribute :remarks, :remarks
-    attribute :address, :address
+    attribute :url, :string, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :string
-    attribute :url, :string, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "location"
       ordered
       map_attribute "uuid", to: :uuid
+      map_element "title", to: :title
+      map_element "address", to: :address
       map_element "email-address", to: :email_address
       map_element "telephone-number", to: :telephone_number
-      map_element "remarks", to: :remarks
-      map_element "address", to: :address
+      map_element "url", to: :url
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "title", to: :title
-      map_element "url", to: :url
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
+      map "title", to: :title, render_empty: true
       map "email-addresses", to: :email_address, with: { to: :json_to_email_address_email_addresses, from: :json_from_email_address_email_addresses }
       map "telephone-numbers", to: :telephone_number, render_empty: true
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
       map "url", to: :url, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "address", to: :address, with: { to: :json_to_asm_address_address }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
     end
 
-    def json_from_remarks_remarks(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
-        instance.instance_variable_set(:@remarks, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Remarks.new(content: "")
-          instance.instance_variable_set(:@remarks, inst)
-        else
-          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-      end
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
+    def json_to_asm_address_address(instance, doc)
+      current = instance.instance_variable_get(:@address)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["address"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Address.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+          doc["address"] = Oscal::V1_2_1::Address.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
+          doc["address"] = val
         end
       end
     end
@@ -450,13 +470,31 @@ module Oscal::V1_2_1
     def json_to_asm_link_links(instance, doc)
       current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
         end
       end
     end
@@ -480,7 +518,9 @@ module Oscal::V1_2_1
     def json_to_email_address_email_addresses(instance, doc)
       current = instance.instance_variable_get(:@email_address)
       if current.is_a?(Array)
-        doc["email-addresses"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["email-addresses"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::EmailAddress.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["email-addresses"] = Oscal::V1_2_1::EmailAddress.as_json(current)
@@ -489,73 +529,6 @@ module Oscal::V1_2_1
           doc["email-addresses"] = val
         end
       end
-    end
-
-    def json_to_asm_address_address(instance, doc)
-      current = instance.instance_variable_get(:@address)
-      if current.is_a?(Array)
-        doc["address"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["address"] = Oscal::V1_2_1::Address.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["address"] = val
-        end
-      end
-    end
-
-    def validate_occurrences
-      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
-    end
-  end
-  class MetadataParty < Base
-    attribute :uuid, :string
-    attribute :type, :string
-    attribute :email_address, :email_address, collection: true
-    attribute :telephone_number, :telephone_number, collection: true
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :name, :string
-    attribute :short_name, :string
-    attribute :external_id, :external_id_in_metadata, collection: true
-    attribute :member_of_organization, :string, collection: true
-    attribute :address, :address, collection: true
-    attribute :location_uuid, :location_uuid, collection: true
-
-    xml do
-      element "party"
-      ordered
-      map_attribute "uuid", to: :uuid
-      map_attribute "type", to: :type
-      map_element "email-address", to: :email_address
-      map_element "telephone-number", to: :telephone_number
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "name", to: :name
-      map_element "short-name", to: :short_name
-      map_element "external-id", to: :external_id
-      map_element "member-of-organization", to: :member_of_organization
-      map_element "location-uuid", to: :location_uuid
-      map_element "address", to: :address
-    end
-
-    key_value do
-      map "uuid", to: :uuid
-      map "type", to: :type
-      map "email-addresses", to: :email_address, with: { to: :json_to_email_address_email_addresses, from: :json_from_email_address_email_addresses }
-      map "telephone-numbers", to: :telephone_number, render_empty: true
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "name", to: :name, render_empty: true
-      map "short-name", to: :short_name, render_empty: true
-      map "external-id", to: :external_id, render_empty: true
-      map "member-of-organization", to: :member_of_organization, render_empty: true
-      map "location-uuids", to: :location_uuid, with: { to: :json_to_location_uuid_location_uuids, from: :json_from_location_uuid_location_uuids }
-      map "props", to: :property, with: { to: :json_to_asm_property_props }
-      map "links", to: :link, with: { to: :json_to_asm_link_links }
-      map "addresses", to: :address, with: { to: :json_to_asm_address_addresses }
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -577,7 +550,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -588,16 +563,71 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class MetadataParty < Base
+    attribute :uuid, :string
+    attribute :type, :string
+    attribute :name, :string
+    attribute :short_name, :string
+    attribute :external_id, :external_id_in_metadata, collection: true
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :email_address, :email_address, collection: true
+    attribute :telephone_number, :telephone_number, collection: true
+    attribute :address, :address, collection: true
+    attribute :location_uuid, :location_uuid, collection: true
+    attribute :member_of_organization, :string, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "party"
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_attribute "type", to: :type
+      map_element "name", to: :name
+      map_element "short-name", to: :short_name
+      map_element "external-id", to: :external_id
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "email-address", to: :email_address
+      map_element "telephone-number", to: :telephone_number
+      map_element "location-uuid", to: :location_uuid
+      map_element "address", to: :address
+      map_element "member-of-organization", to: :member_of_organization
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "type", to: :type
+      map "name", to: :name, render_empty: true
+      map "short-name", to: :short_name, render_empty: true
+      map "external-id", to: :external_id, render_empty: true
+      map "email-addresses", to: :email_address, with: { to: :json_to_email_address_email_addresses, from: :json_from_email_address_email_addresses }
+      map "telephone-numbers", to: :telephone_number, render_empty: true
+      map "location-uuids", to: :location_uuid, with: { to: :json_to_location_uuid_location_uuids, from: :json_from_location_uuid_location_uuids }
+      map "member-of-organization", to: :member_of_organization, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "addresses", to: :address, with: { to: :json_to_asm_address_addresses }
+    end
+
+    def json_to_asm_address_addresses(instance, doc)
+      current = instance.instance_variable_get(:@address)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["addresses"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Address.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+          doc["addresses"] = Oscal::V1_2_1::Address.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
+          doc["addresses"] = val
         end
       end
     end
@@ -605,13 +635,31 @@ module Oscal::V1_2_1
     def json_to_asm_link_links(instance, doc)
       current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
         end
       end
     end
@@ -629,6 +677,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@email_address, Oscal::V1_2_1::EmailAddress.of_json(value))
+      end
+    end
+
+    def json_to_email_address_email_addresses(instance, doc)
+      current = instance.instance_variable_get(:@email_address)
+      if current.is_a?(Array)
+        doc["email-addresses"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::EmailAddress.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["email-addresses"] = Oscal::V1_2_1::EmailAddress.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["email-addresses"] = val
+        end
       end
     end
 
@@ -648,44 +712,50 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_email_address_email_addresses(instance, doc)
-      current = instance.instance_variable_get(:@email_address)
-      if current.is_a?(Array)
-        doc["email-addresses"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["email-addresses"] = Oscal::V1_2_1::EmailAddress.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["email-addresses"] = val
-        end
-      end
-    end
-
-    def json_to_asm_address_addresses(instance, doc)
-      current = instance.instance_variable_get(:@address)
-      if current.is_a?(Array)
-        doc["addresses"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["addresses"] = Oscal::V1_2_1::Address.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["addresses"] = val
-        end
-      end
-    end
-
     def json_to_location_uuid_location_uuids(instance, doc)
       current = instance.instance_variable_get(:@location_uuid)
       if current.is_a?(Array)
-        doc["location-uuids"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["location-uuids"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LocationUuid.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["location-uuids"] = Oscal::V1_2_1::LocationUuid.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["location-uuids"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
         end
       end
     end
@@ -743,39 +813,67 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class BackMatterResource < Base
     attribute :uuid, :string
-    attribute :document_id, :document_id, collection: true
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
     attribute :title, :string
     attribute :description, :string
-    attribute :base64, :base64_in_back_matter
+    attribute :property, :property, collection: true
+    attribute :document_id, :document_id, collection: true
     attribute :citation, :string
     attribute :rlink, :string, collection: true
+    attribute :base64, :base64_in_back_matter
+    attribute :remarks, :remarks
 
     xml do
       element "resource"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "document-id", to: :document_id
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
       map_element "title", to: :title
       map_element "description", to: :description
-      map_element "base64", to: :base64
+      map_element "prop", to: :property
+      map_element "document-id", to: :document_id
       map_element "citation", to: :citation
       map_element "rlink", to: :rlink
+      map_element "base64", to: :base64
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "document-ids", to: :document_id, render_empty: true
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
       map "description", to: :description, render_empty: true
+      map "document-ids", to: :document_id, render_empty: true
       map "base64", to: :base64, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "citation", to: :citation, with: { to: :json_to_asm_citation_citation }
       map "rlinks", to: :rlink, with: { to: :json_to_asm_rlink_rlinks }
@@ -787,6 +885,22 @@ module Oscal::V1_2_1
         doc["citation"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
         doc["citation"] = current.respond_to?(:content) ? current.content : current
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
       end
     end
 
@@ -818,27 +932,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
         end
       end
     end
@@ -895,6 +997,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class PartProse < Base
@@ -985,6 +1115,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ParameterLabel < Base
     attribute :content, :string, collection: true
@@ -1034,6 +1192,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ParameterUsage < Base
@@ -1124,6 +1310,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ParameterConstraintDescription < Base
     attribute :content, :string, collection: true
@@ -1213,21 +1427,49 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ParameterConstraintTest < Base
-    attribute :remarks, :remarks
     attribute :expression, :string
+    attribute :remarks, :remarks
 
     xml do
       element "test"
       ordered
-      map_element "remarks", to: :remarks
       map_element "expression", to: :expression
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "expression", to: :expression, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -1249,7 +1491,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -1352,6 +1596,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ParameterSelectionChoice < Base
     attribute :content, :string, collection: true
@@ -1401,6 +1673,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ControlTitle < Base
@@ -1452,6 +1752,34 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class GroupTitle < Base
     attribute :content, :string, collection: true
@@ -1501,6 +1829,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class QualifierItemDescription < Base
@@ -1591,6 +1947,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class MergeCombine < Base
     attribute :method_attr, :string
@@ -1631,7 +2015,9 @@ module Oscal::V1_2_1
     def json_to_asm_group_groups(instance, doc)
       current = instance.instance_variable_get(:@group)
       if current.is_a?(Array)
-        doc["groups"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["groups"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Group.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["groups"] = Oscal::V1_2_1::Group.as_json(current)
@@ -1645,7 +2031,9 @@ module Oscal::V1_2_1
     def json_to_asm_insert_controls_insert_controls(instance, doc)
       current = instance.instance_variable_get(:@insert_controls)
       if current.is_a?(Array)
-        doc["insert-controls"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["insert-controls"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::InsertControls.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["insert-controls"] = Oscal::V1_2_1::InsertControls.as_json(current)
@@ -1662,10 +2050,10 @@ module Oscal::V1_2_1
     attribute :depends_on, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :parameter_constraint, :parameter_constraint, collection: true
-    attribute :parameter_guideline, :parameter_guideline, collection: true
     attribute :label, :string
     attribute :usage, :string
+    attribute :parameter_constraint, :parameter_constraint, collection: true
+    attribute :parameter_guideline, :parameter_guideline, collection: true
     attribute :parameter_selection, :parameter_selection
     attribute :parameter_value, :parameter_value, collection: true
 
@@ -1677,10 +2065,10 @@ module Oscal::V1_2_1
       map_attribute "depends-on", to: :depends_on
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "constraint", to: :parameter_constraint
-      map_element "guideline", to: :parameter_guideline
       map_element "label", to: :label
       map_element "usage", to: :usage
+      map_element "constraint", to: :parameter_constraint
+      map_element "guideline", to: :parameter_guideline
       map_element "value", to: :parameter_value
       map_element "select", to: :parameter_selection
     end
@@ -1699,10 +2087,28 @@ module Oscal::V1_2_1
       map "select", to: :parameter_selection, with: { to: :json_to_asm_parameter_selection_select }
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
     def json_to_asm_parameter_constraint_constraints(instance, doc)
       current = instance.instance_variable_get(:@parameter_constraint)
       if current.is_a?(Array)
-        doc["constraints"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["constraints"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ParameterConstraint.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["constraints"] = Oscal::V1_2_1::ParameterConstraint.as_json(current)
@@ -1716,7 +2122,9 @@ module Oscal::V1_2_1
     def json_to_asm_parameter_guideline_guidelines(instance, doc)
       current = instance.instance_variable_get(:@parameter_guideline)
       if current.is_a?(Array)
-        doc["guidelines"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["guidelines"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ParameterGuideline.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["guidelines"] = Oscal::V1_2_1::ParameterGuideline.as_json(current)
@@ -1730,7 +2138,9 @@ module Oscal::V1_2_1
     def json_to_asm_parameter_selection_select(instance, doc)
       current = instance.instance_variable_get(:@parameter_selection)
       if current.is_a?(Array)
-        doc["select"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["select"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ParameterSelection.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["select"] = Oscal::V1_2_1::ParameterSelection.as_json(current)
@@ -1744,27 +2154,15 @@ module Oscal::V1_2_1
     def json_to_asm_property_props(instance, doc)
       current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["props"] = Oscal::V1_2_1::Property.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -1788,7 +2186,9 @@ module Oscal::V1_2_1
     def json_to_parameter_value_values(instance, doc)
       current = instance.instance_variable_get(:@parameter_value)
       if current.is_a?(Array)
-        doc["values"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["values"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ParameterValue.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["values"] = Oscal::V1_2_1::ParameterValue.as_json(current)
@@ -1818,21 +2218,21 @@ module Oscal::V1_2_1
       map "adds", to: :add, with: { to: :json_to_asm_add_adds }
     end
 
-    def json_to_asm_remove_removes(instance, doc)
-      current = instance.instance_variable_get(:@remove)
-      if current.is_a?(Array)
-        doc["removes"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        doc["removes"] = current.respond_to?(:content) ? current.content : current
-      end
-    end
-
     def json_to_asm_add_adds(instance, doc)
       current = instance.instance_variable_get(:@add)
       if current.is_a?(Array)
         doc["adds"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
         doc["adds"] = current.respond_to?(:content) ? current.content : current
+      end
+    end
+
+    def json_to_asm_remove_removes(instance, doc)
+      current = instance.instance_variable_get(:@remove)
+      if current.is_a?(Array)
+        doc["removes"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+      elsif current
+        doc["removes"] = current.respond_to?(:content) ? current.content : current
       end
     end
   end
@@ -1884,6 +2284,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class SystemComponentDescription < Base
@@ -1974,6 +2402,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class SystemComponentPurpose < Base
     attribute :content, :string, collection: true
@@ -2024,6 +2480,34 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class SystemComponentStatus < Base
     attribute :state, :string
@@ -2060,7 +2544,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -2124,6 +2610,34 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class SystemUserTitle < Base
     attribute :content, :string, collection: true
@@ -2173,6 +2687,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class SystemUserDescription < Base
@@ -2263,6 +2805,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AuthorizedPrivilegeTitle < Base
     attribute :content, :string, collection: true
@@ -2312,6 +2882,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class AuthorizedPrivilegeDescription < Base
@@ -2402,6 +3000,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class InventoryItemDescription < Base
     attribute :content, :string, collection: true
@@ -2491,22 +3117,50 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class InventoryItemImplementedComponent < Base
     attribute :component_uuid, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_party, :responsible_party, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "implemented-component"
       ordered
       map_attribute "component-uuid", to: :component_uuid
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-party", to: :responsible_party
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -2517,10 +3171,44 @@ module Oscal::V1_2_1
       map "responsible-parties", to: :responsible_party, with: { to: :json_to_asm_responsible_party_responsible_parties }
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
     def json_to_asm_responsible_party_responsible_parties(instance, doc)
       current = instance.instance_variable_get(:@responsible_party)
       if current.is_a?(Array)
-        doc["responsible-parties"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["responsible-parties"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleParty.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["responsible-parties"] = Oscal::V1_2_1::ResponsibleParty.as_json(current)
@@ -2550,41 +3238,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -2641,6 +3303,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class DefinedComponentDescription < Base
@@ -2731,6 +3421,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class DefinedComponentPurpose < Base
     attribute :content, :string, collection: true
@@ -2780,6 +3498,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class CapabilityDescription < Base
@@ -2870,6 +3616,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ControlImplementationDescription < Base
     attribute :content, :string, collection: true
@@ -2958,6 +3732,34 @@ module Oscal::V1_2_1
       map "hr", to: :hr
       map "blockquote", to: :blockquote
       map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class IncorporatesComponentDescription < Base
@@ -3048,6 +3850,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ImplementedRequirementDescription < Base
     attribute :content, :string, collection: true
@@ -3136,6 +3966,34 @@ module Oscal::V1_2_1
       map "hr", to: :hr
       map "blockquote", to: :blockquote
       map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class StatementDescription < Base
@@ -3226,6 +4084,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class SystemCharacteristicsDescription < Base
     attribute :content, :string, collection: true
@@ -3315,78 +4201,94 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class SystemImplementationLeveragedAuthorization < Base
     attribute :uuid, :string
-    attribute :date_authorized, :date_authorized
-    attribute :remarks, :remarks
+    attribute :title, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :string
     attribute :party_uuid, :string
+    attribute :date_authorized, :date_authorized
+    attribute :remarks, :remarks
 
     xml do
       element "leveraged-authorization"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "date-authorized", to: :date_authorized
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "title", to: :title
       map_element "party-uuid", to: :party_uuid
+      map_element "date-authorized", to: :date_authorized
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "date-authorized", to: :date_authorized, with: { to: :json_to_date_authorized_date_authorized, from: :json_from_date_authorized_date_authorized }
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
       map "party-uuid", to: :party_uuid, render_empty: true
+      map "date-authorized", to: :date_authorized, with: { to: :json_to_date_authorized_date_authorized, from: :json_from_date_authorized_date_authorized }
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
     end
 
     def json_to_asm_property_props(instance, doc)
       current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["props"] = Oscal::V1_2_1::Property.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["props"] = val
-        end
-      end
-    end
-
-    def json_from_remarks_remarks(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
-        instance.instance_variable_set(:@remarks, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Remarks.new(content: "")
-          instance.instance_variable_set(:@remarks, inst)
-        else
-          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-      end
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
         end
       end
     end
@@ -3410,7 +4312,9 @@ module Oscal::V1_2_1
     def json_to_date_authorized_date_authorized(instance, doc)
       current = instance.instance_variable_get(:@date_authorized)
       if current.is_a?(Array)
-        doc["date-authorized"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["date-authorized"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::DateAuthorized.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["date-authorized"] = Oscal::V1_2_1::DateAuthorized.as_json(current)
@@ -3421,16 +4325,34 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
+          doc["remarks"] = val
         end
       end
     end
@@ -3441,25 +4363,25 @@ module Oscal::V1_2_1
   end
   class SystemInformationInformationType < Base
     attribute :uuid, :string
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :impact, :impact
     attribute :title, :string
     attribute :description, :string
     attribute :categorization, :string, collection: true
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :impact, :impact
 
     xml do
       element "information-type"
       ordered
       map_attribute "uuid", to: :uuid
+      map_element "title", to: :title
+      map_element "description", to: :description
+      map_element "categorization", to: :categorization
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "confidentiality-impact", to: :impact
       map_element "integrity-impact", to: :impact
       map_element "availability-impact", to: :impact
-      map_element "title", to: :title
-      map_element "description", to: :description
-      map_element "categorization", to: :categorization
     end
 
     key_value do
@@ -3474,10 +4396,37 @@ module Oscal::V1_2_1
       map "categorizations", to: :categorization, with: { to: :json_to_asm_categorization_categorizations }
     end
 
+    def json_to_asm_categorization_categorizations(instance, doc)
+      current = instance.instance_variable_get(:@categorization)
+      if current.is_a?(Array)
+        doc["categorizations"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+      elsif current
+        doc["categorizations"] = current.respond_to?(:content) ? current.content : current
+      end
+    end
+
+    def json_to_asm_impact_availability_impact(instance, doc)
+      current = instance.instance_variable_get(:@impact)
+      if current.is_a?(Array)
+        doc["availability-impact"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Impact.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["availability-impact"] = Oscal::V1_2_1::Impact.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["availability-impact"] = val
+        end
+      end
+    end
+
     def json_to_asm_impact_confidentiality_impact(instance, doc)
       current = instance.instance_variable_get(:@impact)
       if current.is_a?(Array)
-        doc["confidentiality-impact"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["confidentiality-impact"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Impact.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["confidentiality-impact"] = Oscal::V1_2_1::Impact.as_json(current)
@@ -3491,7 +4440,9 @@ module Oscal::V1_2_1
     def json_to_asm_impact_integrity_impact(instance, doc)
       current = instance.instance_variable_get(:@impact)
       if current.is_a?(Array)
-        doc["integrity-impact"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["integrity-impact"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Impact.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["integrity-impact"] = Oscal::V1_2_1::Impact.as_json(current)
@@ -3502,53 +4453,34 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_impact_availability_impact(instance, doc)
-      current = instance.instance_variable_get(:@impact)
-      if current.is_a?(Array)
-        doc["availability-impact"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["availability-impact"] = Oscal::V1_2_1::Impact.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["availability-impact"] = val
-        end
-      end
-    end
-
-    def json_to_asm_categorization_categorizations(instance, doc)
-      current = instance.instance_variable_get(:@categorization)
-      if current.is_a?(Array)
-        doc["categorizations"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        doc["categorizations"] = current.respond_to?(:content) ? current.content : current
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
     def json_to_asm_link_links(instance, doc)
       current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
         end
       end
     end
@@ -3645,6 +4577,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class NetworkArchitectureDescription < Base
     attribute :content, :string, collection: true
@@ -3733,6 +4693,34 @@ module Oscal::V1_2_1
       map "hr", to: :hr
       map "blockquote", to: :blockquote
       map "table", to: :table
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class DataFlowDescription < Base
@@ -3823,6 +4811,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class DiagramDescription < Base
     attribute :content, :string, collection: true
@@ -3912,6 +4928,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class DiagramCaption < Base
     attribute :content, :string, collection: true
@@ -3961,6 +5005,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ByComponentDescription < Base
@@ -4051,70 +5123,75 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ByComponentExport < Base
-    attribute :remarks, :remarks
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :description, :string
     attribute :provided, :string, collection: true
     attribute :responsibility, :string, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "export"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "description", to: :description
       map_element "provided", to: :provided
       map_element "responsibility", to: :responsibility
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
       map "provided", to: :provided, with: { to: :json_to_asm_provided_provided }
       map "responsibilities", to: :responsibility, with: { to: :json_to_asm_responsibility_responsibilities }
     end
 
-    def json_to_asm_provided_provided(instance, doc)
-      current = instance.instance_variable_get(:@provided)
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["provided"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        doc["provided"] = current.respond_to?(:content) ? current.content : current
-      end
-    end
-
-    def json_from_remarks_remarks(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
-        instance.instance_variable_set(:@remarks, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Remarks.new(content: "")
-          instance.instance_variable_set(:@remarks, inst)
-        else
-          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
         end
-      elsif value
-        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-      end
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
+          doc["links"] = val
         end
       end
     end
@@ -4122,7 +5199,9 @@ module Oscal::V1_2_1
     def json_to_asm_property_props(instance, doc)
       current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["props"] = Oscal::V1_2_1::Property.as_json(current)
@@ -4133,17 +5212,12 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
+    def json_to_asm_provided_provided(instance, doc)
+      current = instance.instance_variable_get(:@provided)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["provided"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
-        end
+        doc["provided"] = current.respond_to?(:content) ? current.content : current
       end
     end
 
@@ -4156,6 +5230,38 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
@@ -4163,20 +5269,20 @@ module Oscal::V1_2_1
   class ByComponentInherited < Base
     attribute :uuid, :string
     attribute :provided_uuid, :string
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
-    attribute :description, :string
 
     xml do
       element "inherited"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "provided-uuid", to: :provided_uuid
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-role", to: :responsible_role
-      map_element "description", to: :description
     end
 
     key_value do
@@ -4188,16 +5294,18 @@ module Oscal::V1_2_1
       map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
     end
 
-    def json_to_asm_responsible_role_responsible_roles(instance, doc)
-      current = instance.instance_variable_get(:@responsible_role)
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["responsible-roles"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["responsible-roles"] = val
+          doc["links"] = val
         end
       end
     end
@@ -4205,7 +5313,9 @@ module Oscal::V1_2_1
     def json_to_asm_property_props(instance, doc)
       current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["props"] = Oscal::V1_2_1::Property.as_json(current)
@@ -4216,10 +5326,59 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_asm_responsible_role_responsible_roles(instance, doc)
+      current = instance.instance_variable_get(:@responsible_role)
+      if current.is_a?(Array)
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-roles"] = val
+        end
+      end
+    end
+  end
+  class ByComponentSatisfied < Base
+    attribute :uuid, :string
+    attribute :responsibility_uuid, :string
+    attribute :description, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "satisfied"
+      ordered
+      map_attribute "uuid", to: :uuid
+      map_attribute "responsibility-uuid", to: :responsibility_uuid
+      map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "uuid", to: :uuid
+      map "responsibility-uuid", to: :responsibility_uuid
+      map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, with: { to: :json_to_asm_property_props }
+      map "links", to: :link, with: { to: :json_to_asm_link_links }
+      map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
+    end
+
     def json_to_asm_link_links(instance, doc)
       current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["links"] = Oscal::V1_2_1::Link.as_json(current)
@@ -4229,42 +5388,29 @@ module Oscal::V1_2_1
         end
       end
     end
-  end
-  class ByComponentSatisfied < Base
-    attribute :uuid, :string
-    attribute :responsibility_uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :responsible_role, :responsible_role, collection: true
-    attribute :description, :string
 
-    xml do
-      element "satisfied"
-      ordered
-      map_attribute "uuid", to: :uuid
-      map_attribute "responsibility-uuid", to: :responsibility_uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "responsible-role", to: :responsible_role
-      map_element "description", to: :description
-    end
-
-    key_value do
-      map "uuid", to: :uuid
-      map "responsibility-uuid", to: :responsibility_uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
-      map "props", to: :property, with: { to: :json_to_asm_property_props }
-      map "links", to: :link, with: { to: :json_to_asm_link_links }
-      map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
     end
 
     def json_to_asm_responsible_role_responsible_roles(instance, doc)
       current = instance.instance_variable_get(:@responsible_role)
       if current.is_a?(Array)
-        doc["responsible-roles"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
@@ -4294,41 +5440,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -4425,6 +5545,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AssessmentMethodDescription < Base
     attribute :content, :string, collection: true
@@ -4514,6 +5662,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AssessmentPartTitle < Base
     attribute :content, :string, collection: true
@@ -4563,6 +5739,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class AssessmentPartProse < Base
@@ -4653,6 +5857,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ActivityTitle < Base
     attribute :content, :string, collection: true
@@ -4702,6 +5934,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ActivityDescription < Base
@@ -4792,45 +6052,123 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ActivityStep < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :title, :string
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :reviewed_controls, :reviewed_controls
     attribute :responsible_role, :responsible_role, collection: true
-    attribute :title, :string
-    attribute :description, :string
+    attribute :remarks, :remarks
 
     xml do
       element "step"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "reviewed-controls", to: :reviewed_controls
       map_element "responsible-role", to: :responsible_role
-      map_element "title", to: :title
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
       map "reviewed-controls", to: :reviewed_controls, with: { to: :json_to_asm_reviewed_controls_reviewed_controls }
       map "responsible-roles", to: :responsible_role, with: { to: :json_to_asm_responsible_role_responsible_roles }
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
+    def json_to_asm_responsible_role_responsible_roles(instance, doc)
+      current = instance.instance_variable_get(:@responsible_role)
+      if current.is_a?(Array)
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-roles"] = val
+        end
+      end
+    end
+
     def json_to_asm_reviewed_controls_reviewed_controls(instance, doc)
       current = instance.instance_variable_get(:@reviewed_controls)
       if current.is_a?(Array)
-        doc["reviewed-controls"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["reviewed-controls"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ReviewedControls.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["reviewed-controls"] = Oscal::V1_2_1::ReviewedControls.as_json(current)
@@ -4860,55 +6198,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
-        end
-      end
-    end
-
-    def json_to_asm_responsible_role_responsible_roles(instance, doc)
-      current = instance.instance_variable_get(:@responsible_role)
-      if current.is_a?(Array)
-        doc["responsible-roles"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["responsible-roles"] = val
         end
       end
     end
@@ -5005,30 +6303,58 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ReviewedControlsControlSelection < Base
-    attribute :remarks, :remarks
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :select_control_by_id, :select_control_by_id, collection: true
-    attribute :description, :string
     attribute :include_all, :include_all
+    attribute :select_control_by_id, :select_control_by_id, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "control-selection"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "exclude-control", to: :select_control_by_id
-      map_element "description", to: :description
       map_element "include-all", to: :include_all
       map_element "include-control", to: :select_control_by_id
+      map_element "exclude-control", to: :select_control_by_id
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
       map "exclude-controls", to: :select_control_by_id, with: { to: :json_to_asm_select_control_by_id_exclude_controls }
@@ -5036,10 +6362,60 @@ module Oscal::V1_2_1
       map "include-controls", to: :select_control_by_id, with: { to: :json_to_asm_select_control_by_id_include_controls }
     end
 
+    def json_to_asm_include_all_include_all(instance, doc)
+      current = instance.instance_variable_get(:@include_all)
+      if current.is_a?(Array)
+        doc["include-all"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::IncludeAll.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["include-all"] = Oscal::V1_2_1::IncludeAll.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["include-all"] = val
+        end
+      end
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
     def json_to_asm_select_control_by_id_exclude_controls(instance, doc)
       current = instance.instance_variable_get(:@select_control_by_id)
       if current.is_a?(Array)
-        doc["exclude-controls"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["exclude-controls"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SelectControlById.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["exclude-controls"] = Oscal::V1_2_1::SelectControlById.as_json(current)
@@ -5053,27 +6429,15 @@ module Oscal::V1_2_1
     def json_to_asm_select_control_by_id_include_controls(instance, doc)
       current = instance.instance_variable_get(:@select_control_by_id)
       if current.is_a?(Array)
-        doc["include-controls"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["include-controls"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SelectControlById.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["include-controls"] = Oscal::V1_2_1::SelectControlById.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["include-controls"] = val
-        end
-      end
-    end
-
-    def json_to_asm_include_all_include_all(instance, doc)
-      current = instance.instance_variable_get(:@include_all)
-      if current.is_a?(Array)
-        doc["include-all"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["include-all"] = Oscal::V1_2_1::IncludeAll.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["include-all"] = val
         end
       end
     end
@@ -5097,7 +6461,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -5108,61 +6474,33 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
-        end
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class ReviewedControlsControlObjectiveSelection < Base
-    attribute :remarks, :remarks
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :select_objective_by_id, :select_objective_by_id, collection: true
-    attribute :description, :string
     attribute :include_all, :include_all
+    attribute :select_objective_by_id, :select_objective_by_id, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "control-objective-selection"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "exclude-objective", to: :select_objective_by_id
-      map_element "description", to: :description
       map_element "include-all", to: :include_all
       map_element "include-objective", to: :select_objective_by_id
+      map_element "exclude-objective", to: :select_objective_by_id
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
       map "exclude-objectives", to: :select_objective_by_id, with: { to: :json_to_asm_select_objective_by_id_exclude_objectives }
@@ -5173,7 +6511,9 @@ module Oscal::V1_2_1
     def json_to_asm_include_all_include_all(instance, doc)
       current = instance.instance_variable_get(:@include_all)
       if current.is_a?(Array)
-        doc["include-all"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["include-all"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::IncludeAll.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["include-all"] = Oscal::V1_2_1::IncludeAll.as_json(current)
@@ -5184,10 +6524,44 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
     def json_to_asm_select_objective_by_id_exclude_objectives(instance, doc)
       current = instance.instance_variable_get(:@select_objective_by_id)
       if current.is_a?(Array)
-        doc["exclude-objectives"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["exclude-objectives"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SelectObjectiveById.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["exclude-objectives"] = Oscal::V1_2_1::SelectObjectiveById.as_json(current)
@@ -5201,7 +6575,9 @@ module Oscal::V1_2_1
     def json_to_asm_select_objective_by_id_include_objectives(instance, doc)
       current = instance.instance_variable_get(:@select_objective_by_id)
       if current.is_a?(Array)
-        doc["include-objectives"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["include-objectives"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SelectObjectiveById.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["include-objectives"] = Oscal::V1_2_1::SelectObjectiveById.as_json(current)
@@ -5231,41 +6607,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -5322,6 +6672,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class TaskDescription < Base
@@ -5412,6 +6790,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class TaskTiming < Base
     attribute :on_date, :string
@@ -5432,6 +6838,15 @@ module Oscal::V1_2_1
       map "at-frequency", to: :at_frequency, with: { to: :json_to_asm_at_frequency_at_frequency }
     end
 
+    def json_to_asm_at_frequency_at_frequency(instance, doc)
+      current = instance.instance_variable_get(:@at_frequency)
+      if current.is_a?(Array)
+        doc["at-frequency"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+      elsif current
+        doc["at-frequency"] = current.respond_to?(:content) ? current.content : current
+      end
+    end
+
     def json_to_asm_on_date_on_date(instance, doc)
       current = instance.instance_variable_get(:@on_date)
       if current.is_a?(Array)
@@ -5447,15 +6862,6 @@ module Oscal::V1_2_1
         doc["within-date-range"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
         doc["within-date-range"] = current.respond_to?(:content) ? current.content : current
-      end
-    end
-
-    def json_to_asm_at_frequency_at_frequency(instance, doc)
-      current = instance.instance_variable_get(:@at_frequency)
-      if current.is_a?(Array)
-        doc["at-frequency"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        doc["at-frequency"] = current.respond_to?(:content) ? current.content : current
       end
     end
   end
@@ -5494,7 +6900,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -5511,21 +6919,21 @@ module Oscal::V1_2_1
   end
   class TaskAssociatedActivity < Base
     attribute :activity_uuid, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
     attribute :assessment_subject, :assessment_subject, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "associated-activity"
       ordered
       map_attribute "activity-uuid", to: :activity_uuid
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-role", to: :responsible_role
       map_element "subject", to: :assessment_subject
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -5540,7 +6948,9 @@ module Oscal::V1_2_1
     def json_to_asm_assessment_subject_subjects(instance, doc)
       current = instance.instance_variable_get(:@assessment_subject)
       if current.is_a?(Array)
-        doc["subjects"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["subjects"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentSubject.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["subjects"] = Oscal::V1_2_1::AssessmentSubject.as_json(current)
@@ -5551,10 +6961,44 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
     def json_to_asm_responsible_role_responsible_roles(instance, doc)
       current = instance.instance_variable_get(:@responsible_role)
       if current.is_a?(Array)
-        doc["responsible-roles"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["responsible-roles"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleRole.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["responsible-roles"] = Oscal::V1_2_1::ResponsibleRole.as_json(current)
@@ -5584,41 +7028,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -5715,6 +7133,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AssessmentSubjectPlaceholderDescription < Base
     attribute :content, :string, collection: true
@@ -5804,6 +7250,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AssessmentSubjectPlaceholderSource < Base
     attribute :task_uuid, :string
@@ -5840,7 +7314,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -5904,33 +7380,93 @@ module Oscal::V1_2_1
       map "q", to: :q
       map "img", to: :img
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class AssessmentAssetsAssessmentPlatform < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :title, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :string
     attribute :uses_component, :string, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "assessment-platform"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "title", to: :title
       map_element "uses-component", to: :uses_component
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
       map "uses-components", to: :uses_component, with: { to: :json_to_asm_uses_component_uses_components }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
     end
 
     def json_to_asm_uses_component_uses_components(instance, doc)
@@ -5939,20 +7475,6 @@ module Oscal::V1_2_1
         doc["uses-components"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
       elsif current
         doc["uses-components"] = current.respond_to?(:content) ? current.content : current
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
       end
     end
 
@@ -5975,27 +7497,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -6052,6 +7562,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class FindingTargetDescription < Base
@@ -6142,6 +7680,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class FindingTargetStatus < Base
     attribute :state, :string
@@ -6181,7 +7747,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -6244,6 +7812,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class FindingDescription < Base
@@ -6334,6 +7930,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ObservationTitle < Base
     attribute :content, :string, collection: true
@@ -6383,6 +8007,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ObservationDescription < Base
@@ -6473,30 +8125,90 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ObservationRelevantEvidence < Base
     attribute :href, :string
-    attribute :remarks, :remarks
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :description, :string
+    attribute :remarks, :remarks
 
     xml do
       element "relevant-evidence"
       ordered
       map_attribute "href", to: :href
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "href", to: :href
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -6518,41 +8230,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -6580,7 +8266,9 @@ module Oscal::V1_2_1
     def json_to_asm_assessment_subject_subjects(instance, doc)
       current = instance.instance_variable_get(:@assessment_subject)
       if current.is_a?(Array)
-        doc["subjects"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["subjects"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentSubject.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["subjects"] = Oscal::V1_2_1::AssessmentSubject.as_json(current)
@@ -6643,6 +8331,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class RiskDescription < Base
@@ -6733,6 +8449,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class RiskStatement < Base
     attribute :content, :string, collection: true
@@ -6822,24 +8566,52 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class RiskMitigatingFactor < Base
     attribute :uuid, :string
     attribute :implementation_uuid, :string
+    attribute :description, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :subject_reference, :subject_reference, collection: true
-    attribute :description, :string
 
     xml do
       element "mitigating-factor"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "implementation-uuid", to: :implementation_uuid
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "subject", to: :subject_reference
-      map_element "description", to: :description
     end
 
     key_value do
@@ -6851,16 +8623,18 @@ module Oscal::V1_2_1
       map "subjects", to: :subject_reference, with: { to: :json_to_asm_subject_reference_subjects }
     end
 
-    def json_to_asm_subject_reference_subjects(instance, doc)
-      current = instance.instance_variable_get(:@subject_reference)
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
       if current.is_a?(Array)
-        doc["subjects"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["subjects"] = Oscal::V1_2_1::SubjectReference.as_json(current)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["subjects"] = val
+          doc["links"] = val
         end
       end
     end
@@ -6868,7 +8642,9 @@ module Oscal::V1_2_1
     def json_to_asm_property_props(instance, doc)
       current = instance.instance_variable_get(:@property)
       if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["props"] = Oscal::V1_2_1::Property.as_json(current)
@@ -6879,16 +8655,18 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
+    def json_to_asm_subject_reference_subjects(instance, doc)
+      current = instance.instance_variable_get(:@subject_reference)
       if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["subjects"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SubjectReference.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+          doc["subjects"] = Oscal::V1_2_1::SubjectReference.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
+          doc["subjects"] = val
         end
       end
     end
@@ -6919,9 +8697,9 @@ module Oscal::V1_2_1
     attribute :name, :string
     attribute :system, :string
     attribute :value, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "facet"
@@ -6929,9 +8707,9 @@ module Oscal::V1_2_1
       map_attribute "name", to: :name
       map_attribute "system", to: :system
       map_attribute "value", to: :value
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -6941,6 +8719,38 @@ module Oscal::V1_2_1
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
+    end
+
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -6962,41 +8772,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
         end
       end
     end
@@ -7053,6 +8837,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ResponseDescription < Base
@@ -7143,42 +8955,104 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ResponseRequiredAsset < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
     attribute :subject_reference, :subject_reference, collection: true
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
     attribute :title, :string
     attribute :description, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "required-asset"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
       map_element "subject", to: :subject_reference
-      map_element "prop", to: :property
-      map_element "link", to: :link
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "title", to: :title, render_empty: true
       map "description", to: :description, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "subjects", to: :subject_reference, with: { to: :json_to_asm_subject_reference_subjects }
       map "props", to: :property, with: { to: :json_to_asm_property_props }
       map "links", to: :link, with: { to: :json_to_asm_link_links }
     end
 
+    def json_to_asm_link_links(instance, doc)
+      current = instance.instance_variable_get(:@link)
+      if current.is_a?(Array)
+        doc["links"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Link.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["links"] = val
+        end
+      end
+    end
+
+    def json_to_asm_property_props(instance, doc)
+      current = instance.instance_variable_get(:@property)
+      if current.is_a?(Array)
+        doc["props"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Property.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["props"] = val
+        end
+      end
+    end
+
     def json_to_asm_subject_reference_subjects(instance, doc)
       current = instance.instance_variable_get(:@subject_reference)
       if current.is_a?(Array)
-        doc["subjects"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["subjects"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SubjectReference.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["subjects"] = Oscal::V1_2_1::SubjectReference.as_json(current)
@@ -7208,7 +9082,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -7219,55 +9095,27 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_property_props(instance, doc)
-      current = instance.instance_variable_get(:@property)
-      if current.is_a?(Array)
-        doc["props"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["props"] = Oscal::V1_2_1::Property.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["props"] = val
-        end
-      end
-    end
-
-    def json_to_asm_link_links(instance, doc)
-      current = instance.instance_variable_get(:@link)
-      if current.is_a?(Array)
-        doc["links"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["links"] = Oscal::V1_2_1::Link.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["links"] = val
-        end
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class AssessmentPlanLocalDefinitions < Base
-    attribute :remarks, :remarks
     attribute :system_component, :system_component, collection: true
     attribute :inventory_item, :inventory_item, collection: true
     attribute :system_user, :system_user, collection: true
     attribute :local_objective, :local_objective, collection: true
     attribute :activity, :activity, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "local-definitions"
       ordered
-      map_element "remarks", to: :remarks
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
       map_element "user", to: :system_user
       map_element "objectives-and-methods", to: :local_objective
       map_element "activity", to: :activity
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -7279,10 +9127,60 @@ module Oscal::V1_2_1
       map "activities", to: :activity, with: { to: :json_to_asm_activity_activities }
     end
 
+    def json_to_asm_activity_activities(instance, doc)
+      current = instance.instance_variable_get(:@activity)
+      if current.is_a?(Array)
+        doc["activities"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Activity.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["activities"] = Oscal::V1_2_1::Activity.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["activities"] = val
+        end
+      end
+    end
+
+    def json_to_asm_inventory_item_inventory_items(instance, doc)
+      current = instance.instance_variable_get(:@inventory_item)
+      if current.is_a?(Array)
+        doc["inventory-items"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::InventoryItem.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["inventory-items"] = Oscal::V1_2_1::InventoryItem.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["inventory-items"] = val
+        end
+      end
+    end
+
+    def json_to_asm_local_objective_objectives_and_methods(instance, doc)
+      current = instance.instance_variable_get(:@local_objective)
+      if current.is_a?(Array)
+        doc["objectives-and-methods"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LocalObjective.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["objectives-and-methods"] = Oscal::V1_2_1::LocalObjective.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["objectives-and-methods"] = val
+        end
+      end
+    end
+
     def json_to_asm_system_component_components(instance, doc)
       current = instance.instance_variable_get(:@system_component)
       if current.is_a?(Array)
-        doc["components"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["components"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemComponent.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["components"] = Oscal::V1_2_1::SystemComponent.as_json(current)
@@ -7293,16 +9191,18 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_inventory_item_inventory_items(instance, doc)
-      current = instance.instance_variable_get(:@inventory_item)
+    def json_to_asm_system_user_users(instance, doc)
+      current = instance.instance_variable_get(:@system_user)
       if current.is_a?(Array)
-        doc["inventory-items"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["users"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemUser.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["inventory-items"] = Oscal::V1_2_1::InventoryItem.as_json(current)
+          doc["users"] = Oscal::V1_2_1::SystemUser.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["inventory-items"] = val
+          doc["users"] = val
         end
       end
     end
@@ -7326,55 +9226,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_local_objective_objectives_and_methods(instance, doc)
-      current = instance.instance_variable_get(:@local_objective)
-      if current.is_a?(Array)
-        doc["objectives-and-methods"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["objectives-and-methods"] = Oscal::V1_2_1::LocalObjective.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["objectives-and-methods"] = val
-        end
-      end
-    end
-
-    def json_to_asm_system_user_users(instance, doc)
-      current = instance.instance_variable_get(:@system_user)
-      if current.is_a?(Array)
-        doc["users"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["users"] = Oscal::V1_2_1::SystemUser.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["users"] = val
-        end
-      end
-    end
-
-    def json_to_asm_activity_activities(instance, doc)
-      current = instance.instance_variable_get(:@activity)
-      if current.is_a?(Array)
-        doc["activities"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["activities"] = Oscal::V1_2_1::Activity.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["activities"] = val
         end
       end
     end
@@ -7399,7 +9259,9 @@ module Oscal::V1_2_1
     def json_to_asm_assessment_part_parts(instance, doc)
       current = instance.instance_variable_get(:@assessment_part)
       if current.is_a?(Array)
-        doc["parts"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["parts"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentPart.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["parts"] = Oscal::V1_2_1::AssessmentPart.as_json(current)
@@ -7411,22 +9273,54 @@ module Oscal::V1_2_1
     end
   end
   class AssessmentResultsLocalDefinitions < Base
-    attribute :remarks, :remarks
     attribute :local_objective, :local_objective, collection: true
     attribute :activity, :activity, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "local-definitions"
       ordered
-      map_element "remarks", to: :remarks
       map_element "objectives-and-methods", to: :local_objective
       map_element "activity", to: :activity
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "objectives-and-methods", to: :local_objective, with: { to: :json_to_asm_local_objective_objectives_and_methods }
       map "activities", to: :activity, with: { to: :json_to_asm_activity_activities }
+    end
+
+    def json_to_asm_activity_activities(instance, doc)
+      current = instance.instance_variable_get(:@activity)
+      if current.is_a?(Array)
+        doc["activities"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Activity.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["activities"] = Oscal::V1_2_1::Activity.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["activities"] = val
+        end
+      end
+    end
+
+    def json_to_asm_local_objective_objectives_and_methods(instance, doc)
+      current = instance.instance_variable_get(:@local_objective)
+      if current.is_a?(Array)
+        doc["objectives-and-methods"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LocalObjective.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["objectives-and-methods"] = Oscal::V1_2_1::LocalObjective.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["objectives-and-methods"] = val
+        end
+      end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -7448,41 +9342,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_activity_activities(instance, doc)
-      current = instance.instance_variable_get(:@activity)
-      if current.is_a?(Array)
-        doc["activities"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["activities"] = Oscal::V1_2_1::Activity.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["activities"] = val
-        end
-      end
-    end
-
-    def json_to_asm_local_objective_objectives_and_methods(instance, doc)
-      current = instance.instance_variable_get(:@local_objective)
-      if current.is_a?(Array)
-        doc["objectives-and-methods"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["objectives-and-methods"] = Oscal::V1_2_1::LocalObjective.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["objectives-and-methods"] = val
         end
       end
     end
@@ -7539,6 +9407,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class ResultDescription < Base
@@ -7629,6 +9525,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class ResultLocalDefinitions < Base
     attribute :system_component, :system_component, collection: true
@@ -7658,7 +9582,9 @@ module Oscal::V1_2_1
     def json_to_asm_assessment_assets_assessment_assets(instance, doc)
       current = instance.instance_variable_get(:@assessment_assets)
       if current.is_a?(Array)
-        doc["assessment-assets"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["assessment-assets"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentAssets.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["assessment-assets"] = Oscal::V1_2_1::AssessmentAssets.as_json(current)
@@ -7669,38 +9595,12 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_asm_task_tasks(instance, doc)
-      current = instance.instance_variable_get(:@task)
-      if current.is_a?(Array)
-        doc["tasks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["tasks"] = Oscal::V1_2_1::Task.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["tasks"] = val
-        end
-      end
-    end
-
-    def json_to_asm_system_component_components(instance, doc)
-      current = instance.instance_variable_get(:@system_component)
-      if current.is_a?(Array)
-        doc["components"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["components"] = Oscal::V1_2_1::SystemComponent.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["components"] = val
-        end
-      end
-    end
-
     def json_to_asm_inventory_item_inventory_items(instance, doc)
       current = instance.instance_variable_get(:@inventory_item)
       if current.is_a?(Array)
-        doc["inventory-items"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["inventory-items"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::InventoryItem.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["inventory-items"] = Oscal::V1_2_1::InventoryItem.as_json(current)
@@ -7711,16 +9611,50 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_asm_system_component_components(instance, doc)
+      current = instance.instance_variable_get(:@system_component)
+      if current.is_a?(Array)
+        doc["components"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemComponent.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["components"] = Oscal::V1_2_1::SystemComponent.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["components"] = val
+        end
+      end
+    end
+
     def json_to_asm_system_user_users(instance, doc)
       current = instance.instance_variable_get(:@system_user)
       if current.is_a?(Array)
-        doc["users"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["users"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemUser.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["users"] = Oscal::V1_2_1::SystemUser.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["users"] = val
+        end
+      end
+    end
+
+    def json_to_asm_task_tasks(instance, doc)
+      current = instance.instance_variable_get(:@task)
+      if current.is_a?(Array)
+        doc["tasks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Task.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["tasks"] = Oscal::V1_2_1::Task.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["tasks"] = val
         end
       end
     end
@@ -7745,30 +9679,34 @@ module Oscal::V1_2_1
       map "parts", to: :assessment_part, with: { to: :json_to_asm_assessment_part_parts }
     end
 
-    def json_to_asm_responsible_party_responsible_parties(instance, doc)
-      current = instance.instance_variable_get(:@responsible_party)
-      if current.is_a?(Array)
-        doc["responsible-parties"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["responsible-parties"] = Oscal::V1_2_1::ResponsibleParty.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["responsible-parties"] = val
-        end
-      end
-    end
-
     def json_to_asm_assessment_part_parts(instance, doc)
       current = instance.instance_variable_get(:@assessment_part)
       if current.is_a?(Array)
-        doc["parts"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["parts"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AssessmentPart.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["parts"] = Oscal::V1_2_1::AssessmentPart.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["parts"] = val
+        end
+      end
+    end
+
+    def json_to_asm_responsible_party_responsible_parties(instance, doc)
+      current = instance.instance_variable_get(:@responsible_party)
+      if current.is_a?(Array)
+        doc["responsible-parties"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ResponsibleParty.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["responsible-parties"] = Oscal::V1_2_1::ResponsibleParty.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["responsible-parties"] = val
         end
       end
     end
@@ -7847,6 +9785,34 @@ module Oscal::V1_2_1
       map "sup", to: :sup
       map "q", to: :q
       map "img", to: :img
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
     end
   end
   class PoamItemDescription < Base
@@ -7937,6 +9903,34 @@ module Oscal::V1_2_1
       map "blockquote", to: :blockquote
       map "table", to: :table
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class PoamItemOrigin < Base
     attribute :origin_actor, :origin_actor, collection: true
@@ -7954,7 +9948,9 @@ module Oscal::V1_2_1
     def json_to_asm_origin_actor_actors(instance, doc)
       current = instance.instance_variable_get(:@origin_actor)
       if current.is_a?(Array)
-        doc["actors"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["actors"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::OriginActor.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["actors"] = Oscal::V1_2_1::OriginActor.as_json(current)
@@ -8004,7 +10000,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -8031,6 +10029,40 @@ module Oscal::V1_2_1
       map "content", to: :content
     end
 
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
     def self.metaschema_constraints
       @metaschema_constraints
     end
@@ -8052,6 +10084,40 @@ module Oscal::V1_2_1
       map "content", to: :content
     end
 
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
     def self.metaschema_constraints
       @metaschema_constraints
     end
@@ -8071,6 +10137,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
 
     def self.metaschema_constraints
@@ -8095,6 +10195,26 @@ module Oscal::V1_2_1
     key_value do
       map "value", to: :content
       map "algorithm", to: :algorithm
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
     end
 
     def self.metaschema_constraints
@@ -8169,6 +10289,34 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class Published < Base
     attribute :content, :string
@@ -8180,6 +10328,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class LastModified < Base
@@ -8193,6 +10375,40 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
   end
   class Version < Base
     attribute :content, :string
@@ -8204,6 +10420,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class OscalVersion < Base
@@ -8217,6 +10467,40 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
   end
   class EmailAddress < Base
     attribute :content, :string
@@ -8228,6 +10512,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class TelephoneNumber < Base
@@ -8243,6 +10561,26 @@ module Oscal::V1_2_1
     key_value do
       map "number", to: :content
       map "type", to: :type
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
     end
 
     def self.metaschema_constraints
@@ -8265,6 +10603,40 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
   end
   class DocumentId < Base
     attribute :content, :string
@@ -8280,6 +10652,26 @@ module Oscal::V1_2_1
       map "identifier", to: :content
       map "scheme", to: :scheme
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
   end
   class ParameterValue < Base
     attribute :content, :string
@@ -8292,6 +10684,40 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
   end
   class WithId < Base
     attribute :content, :string
@@ -8303,6 +10729,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class Coverage < Base
@@ -8319,6 +10779,26 @@ module Oscal::V1_2_1
       map "target-coverage", to: :content
       map "generation-method", to: :generation_method
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
   end
   class Percentage < Base
     attribute :content, :string
@@ -8330,6 +10810,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class MappingDescription < Base
@@ -8395,6 +10909,34 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class FunctionPerformed < Base
     attribute :content, :string
@@ -8406,6 +10948,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class SystemId < Base
@@ -8422,6 +10998,26 @@ module Oscal::V1_2_1
       map "id", to: :content
       map "identifier-type", to: :identifier_type
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
   end
   class BaseField < Base
     attribute :content, :string
@@ -8434,6 +11030,40 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
   end
   class Selected < Base
     attribute :content, :string
@@ -8445,6 +11075,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class AdjustmentJustification < Base
@@ -8510,6 +11174,34 @@ module Oscal::V1_2_1
     key_value do
       map "content", to: :content
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      Metaschema::MarkupConverter.from_markdown(self, data)
+    end
+
+    def self.as_json(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
+
+    def self.as_yaml(instance, options = {})
+      Metaschema::MarkupConverter.to_markdown(instance)
+    end
   end
   class DateAuthorized < Base
     attribute :content, :string
@@ -8521,6 +11213,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
   end
   class ThreatId < Base
@@ -8540,6 +11266,26 @@ module Oscal::V1_2_1
       map "system", to: :system
       map "href", to: :href
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
   end
   class RiskStatus < Base
     attribute :content, :string
@@ -8551,6 +11297,40 @@ module Oscal::V1_2_1
 
     key_value do
       map "content", to: :content
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.as_json(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
+    end
+
+    def self.as_yaml(instance, options = {})
+      result = super(instance, options)
+      return result unless result.is_a?(Hash) && result.keys == ["content"]
+      value = result["content"]
+      value.is_a?(Array) && value.length == 1 ? value.first : value
     end
 
     def self.metaschema_constraints
@@ -8573,8 +11353,28 @@ module Oscal::V1_2_1
     end
 
     key_value do
-      map "STRVALUE", to: :content
+      map "id", to: :content
       map "scheme", to: :scheme
+    end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
     end
   end
   class Base64InBackMatter < Base
@@ -8590,46 +11390,66 @@ module Oscal::V1_2_1
     end
 
     key_value do
-      map "STRVALUE", to: :content
+      map "value", to: :content
       map "filename", to: :filename
       map "media-type", to: :media_type
     end
+
+    def self.of_json(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_json(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
+
+    def self.of_yaml(doc, options = {})
+      return super(doc, options) if doc.is_a?(Hash) || doc.is_a?(Array)
+      new(content: doc)
+    end
+
+    def self.from_yaml(data, options = {})
+      return super(data, options) if data.is_a?(Hash) || data.is_a?(Array)
+      new(content: data)
+    end
   end
   class Metadata < Base
+    attribute :title, :metadata_title
     attribute :published, :published
     attribute :last_modified, :last_modified
     attribute :version, :version
     attribute :oscal_version, :oscal_version
+    attribute :revision, :metadata_revision, collection: true
     attribute :document_id, :document_id, collection: true
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :responsible_party, :responsible_party, collection: true
-    attribute :action, :action, collection: true
-    attribute :title, :metadata_title
-    attribute :revision, :metadata_revision, collection: true
     attribute :role, :metadata_role, collection: true
     attribute :location, :metadata_location, collection: true
     attribute :party, :metadata_party, collection: true
+    attribute :responsible_party, :responsible_party, collection: true
+    attribute :action, :action, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "metadata"
       ordered
+      map_element "title", to: :title
       map_element "published", to: :published
       map_element "last-modified", to: :last_modified
       map_element "version", to: :version
       map_element "oscal-version", to: :oscal_version
+      map_element "revision", to: :revision
       map_element "document-id", to: :document_id
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "responsible-party", to: :responsible_party
-      map_element "action", to: :action
-      map_element "title", to: :title
-      map_element "revision", to: :revision
       map_element "role", to: :role
       map_element "location", to: :location
       map_element "party", to: :party
+      map_element "responsible-party", to: :responsible_party
+      map_element "action", to: :action
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -8638,7 +11458,7 @@ module Oscal::V1_2_1
       map "version", to: :version, with: { to: :json_to_version_version, from: :json_from_version_version }
       map "oscal-version", to: :oscal_version, with: { to: :json_to_oscal_version_oscal_version, from: :json_from_oscal_version_oscal_version }
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-parties", to: :responsible_party, render_empty: true
@@ -8651,40 +11471,28 @@ module Oscal::V1_2_1
       map "document-id", to: :document_id, with: { to: :json_soa_to_document_id_document_ids, from: :json_soa_from_document_id_document_ids }
     end
 
-    def json_from_published_published(instance, value)
+    def json_from_last_modified_last_modified(instance, value)
       if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Published.of_json(v) }
-        instance.instance_variable_set(:@published, parsed)
+        parsed = value.map { |v| Oscal::V1_2_1::LastModified.of_json(v) }
+        instance.instance_variable_set(:@last_modified, parsed)
       elsif value.is_a?(Hash)
         if value.empty?
-          inst = Oscal::V1_2_1::Published.new(content: "")
-          instance.instance_variable_set(:@published, inst)
+          inst = Oscal::V1_2_1::LastModified.new(content: "")
+          instance.instance_variable_set(:@last_modified, inst)
         else
-          instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+          instance.instance_variable_set(:@last_modified, Oscal::V1_2_1::LastModified.of_json(value))
         end
       elsif value
-        instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
-      end
-    end
-
-    def json_to_published_published(instance, doc)
-      current = instance.instance_variable_get(:@published)
-      if current.is_a?(Array)
-        doc["published"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["published"] = Oscal::V1_2_1::Published.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["published"] = val
-        end
+        instance.instance_variable_set(:@last_modified, Oscal::V1_2_1::LastModified.of_json(value))
       end
     end
 
     def json_to_last_modified_last_modified(instance, doc)
       current = instance.instance_variable_get(:@last_modified)
       if current.is_a?(Array)
-        doc["last-modified"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["last-modified"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::LastModified.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["last-modified"] = Oscal::V1_2_1::LastModified.as_json(current)
@@ -8695,34 +11503,24 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_from_version_version(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Version.of_json(v) }
-        instance.instance_variable_set(:@version, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Version.new(content: "")
-          instance.instance_variable_set(:@version, inst)
-        else
-          instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
-      end
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::MetadataTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::MetadataTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
     end
 
-    def json_to_version_version(instance, doc)
-      current = instance.instance_variable_get(:@version)
-      if current.is_a?(Array)
-        doc["version"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["version"] = Oscal::V1_2_1::Version.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["version"] = val
-        end
-      end
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_oscal_version_oscal_version(instance, value)
@@ -8744,7 +11542,9 @@ module Oscal::V1_2_1
     def json_to_oscal_version_oscal_version(instance, doc)
       current = instance.instance_variable_get(:@oscal_version)
       if current.is_a?(Array)
-        doc["oscal-version"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["oscal-version"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::OscalVersion.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["oscal-version"] = Oscal::V1_2_1::OscalVersion.as_json(current)
@@ -8755,19 +11555,35 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_from_last_modified_last_modified(instance, value)
+    def json_from_published_published(instance, value)
       if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::LastModified.of_json(v) }
-        instance.instance_variable_set(:@last_modified, parsed)
+        parsed = value.map { |v| Oscal::V1_2_1::Published.of_json(v) }
+        instance.instance_variable_set(:@published, parsed)
       elsif value.is_a?(Hash)
         if value.empty?
-          inst = Oscal::V1_2_1::LastModified.new(content: "")
-          instance.instance_variable_set(:@last_modified, inst)
+          inst = Oscal::V1_2_1::Published.new(content: "")
+          instance.instance_variable_set(:@published, inst)
         else
-          instance.instance_variable_set(:@last_modified, Oscal::V1_2_1::LastModified.of_json(value))
+          instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
         end
       elsif value
-        instance.instance_variable_set(:@last_modified, Oscal::V1_2_1::LastModified.of_json(value))
+        instance.instance_variable_set(:@published, Oscal::V1_2_1::Published.of_json(value))
+      end
+    end
+
+    def json_to_published_published(instance, doc)
+      current = instance.instance_variable_get(:@published)
+      if current.is_a?(Array)
+        doc["published"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Published.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["published"] = Oscal::V1_2_1::Published.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["published"] = val
+        end
       end
     end
 
@@ -8790,7 +11606,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -8829,6 +11647,38 @@ module Oscal::V1_2_1
           end
         end
         doc["document-ids"] = result.length == 1 ? result.first : result
+      end
+    end
+
+    def json_from_version_version(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Version.of_json(v) }
+        instance.instance_variable_set(:@version, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Version.new(content: "")
+          instance.instance_variable_set(:@version, inst)
+        else
+          instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@version, Oscal::V1_2_1::Version.of_json(value))
+      end
+    end
+
+    def json_to_version_version(instance, doc)
+      current = instance.instance_variable_get(:@version)
+      if current.is_a?(Array)
+        doc["version"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Version.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["version"] = Oscal::V1_2_1::Version.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["version"] = val
+        end
       end
     end
 
@@ -8895,7 +11745,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -8941,7 +11793,27 @@ module Oscal::V1_2_1
       map "rel", to: :rel
       map "resource-fragment", to: :resource_fragment
       map "media-type", to: :media_type
-      map "text", to: :text, render_empty: true
+      map "text", to: :text, with: { to: :json_md_to_text_text, from: :json_md_from_text_text }
+    end
+
+    def json_md_from_text_text(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::LinkText, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::LinkText, value)
+               end
+      instance.instance_variable_set(:@text, parsed)
+    end
+
+    def json_md_to_text_text(instance, doc)
+      current = instance.instance_variable_get(:@text)
+      return if current.nil?
+      doc["text"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -8951,181 +11823,6 @@ module Oscal::V1_2_1
     def validate_constraints
       validator = Metaschema::ConstraintValidator.new
       validator.validate(self, self.class.metaschema_constraints)
-    end
-  end
-  class ResponsibleParty < Base
-    attribute :role_id, :string
-    attribute :party_uuid, :party_uuid, collection: true
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-
-    xml do
-      element "responsible-party"
-      ordered
-      map_attribute "role-id", to: :role_id
-      map_element "party-uuid", to: :party_uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-    end
-
-    key_value do
-      map "role-id", to: :role_id
-      map "party-uuids", to: :party_uuid, with: { to: :json_to_party_uuid_party_uuids, from: :json_from_party_uuid_party_uuids }
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "props", to: :property, render_empty: true
-      map "links", to: :link, render_empty: true
-    end
-
-    def json_from_party_uuid_party_uuids(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::PartyUuid.of_json(v) }
-        instance.instance_variable_set(:@party_uuid, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::PartyUuid.new(content: "")
-          instance.instance_variable_set(:@party_uuid, inst)
-        else
-          instance.instance_variable_set(:@party_uuid, Oscal::V1_2_1::PartyUuid.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@party_uuid, Oscal::V1_2_1::PartyUuid.of_json(value))
-      end
-    end
-
-    def json_to_party_uuid_party_uuids(instance, doc)
-      current = instance.instance_variable_get(:@party_uuid)
-      if current.is_a?(Array)
-        doc["party-uuids"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["party-uuids"] = Oscal::V1_2_1::PartyUuid.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["party-uuids"] = val
-        end
-      end
-    end
-
-    def json_from_remarks_remarks(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
-        instance.instance_variable_set(:@remarks, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Remarks.new(content: "")
-          instance.instance_variable_set(:@remarks, inst)
-        else
-          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-      end
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
-    end
-
-    def self.metaschema_constraints
-      @metaschema_constraints
-    end
-
-    def validate_constraints
-      validator = Metaschema::ConstraintValidator.new
-      validator.validate(self, self.class.metaschema_constraints)
-    end
-
-    def validate_occurrences
-      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
-    end
-  end
-  class Action < Base
-    attribute :uuid, :string
-    attribute :date, :string
-    attribute :type, :string
-    attribute :system, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :responsible_party, :responsible_party, collection: true
-
-    xml do
-      element "action"
-      ordered
-      map_attribute "uuid", to: :uuid
-      map_attribute "date", to: :date
-      map_attribute "type", to: :type
-      map_attribute "system", to: :system
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "responsible-party", to: :responsible_party
-    end
-
-    key_value do
-      map "uuid", to: :uuid
-      map "date", to: :date
-      map "type", to: :type
-      map "system", to: :system
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "props", to: :property, render_empty: true
-      map "links", to: :link, render_empty: true
-      map "responsible-parties", to: :responsible_party, render_empty: true
-    end
-
-    def json_from_remarks_remarks(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
-        instance.instance_variable_set(:@remarks, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Remarks.new(content: "")
-          instance.instance_variable_set(:@remarks, inst)
-        else
-          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
-      end
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
-    end
-
-    def self.metaschema_constraints
-      @metaschema_constraints
-    end
-
-    def validate_constraints
-      validator = Metaschema::ConstraintValidator.new
-      validator.validate(self, self.class.metaschema_constraints)
-    end
-
-    def validate_occurrences
-      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class Address < Base
@@ -9175,7 +11872,9 @@ module Oscal::V1_2_1
     def json_to_addr_line_addr_lines(instance, doc)
       current = instance.instance_variable_get(:@addr_line)
       if current.is_a?(Array)
-        doc["addr-lines"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["addr-lines"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AddrLine.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["addr-lines"] = Oscal::V1_2_1::AddrLine.as_json(current)
@@ -9186,43 +11885,21 @@ module Oscal::V1_2_1
       end
     end
   end
-  class BackMatter < Base
-    attribute :resource, :back_matter_resource, collection: true
-
-    xml do
-      element "back-matter"
-      ordered
-      map_element "resource", to: :resource
-    end
-
-    key_value do
-      map "resources", to: :resource, render_empty: true
-    end
-
-    def self.metaschema_constraints
-      @metaschema_constraints
-    end
-
-    def validate_constraints
-      validator = Metaschema::ConstraintValidator.new
-      validator.validate(self, self.class.metaschema_constraints)
-    end
-  end
-  class ResponsibleRole < Base
+  class ResponsibleParty < Base
     attribute :role_id, :string
     attribute :party_uuid, :party_uuid, collection: true
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
-      element "responsible-role"
+      element "responsible-party"
       ordered
       map_attribute "role-id", to: :role_id
       map_element "party-uuid", to: :party_uuid
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -9252,7 +11929,9 @@ module Oscal::V1_2_1
     def json_to_party_uuid_party_uuids(instance, doc)
       current = instance.instance_variable_get(:@party_uuid)
       if current.is_a?(Array)
-        doc["party-uuids"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["party-uuids"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::PartyUuid.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["party-uuids"] = Oscal::V1_2_1::PartyUuid.as_json(current)
@@ -9282,7 +11961,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -9293,47 +11974,6 @@ module Oscal::V1_2_1
       end
     end
 
-    def validate_occurrences
-      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
-    end
-  end
-  class Part < Base
-    attribute :id, :string
-    attribute :name, :string
-    attribute :ns, :string
-    attribute :class_attr, :string
-    attribute :property, :property, collection: true
-    attribute :part, :part, collection: true
-    attribute :link, :link, collection: true
-    attribute :title, :part_title
-    attribute :prose, :part_prose
-
-    xml do
-      element "part"
-      ordered
-      map_attribute "id", to: :id
-      map_attribute "name", to: :name
-      map_attribute "ns", to: :ns
-      map_attribute "class", to: :class_attr
-      map_element "prop", to: :property
-      map_element "part", to: :part
-      map_element "link", to: :link
-      map_element "title", to: :title
-      map_element "prose", to: :prose
-    end
-
-    key_value do
-      map "id", to: :id
-      map "name", to: :name
-      map "ns", to: :ns
-      map "class", to: :class_attr
-      map "title", to: :title, render_empty: true
-      map "prose", to: :prose, render_empty: true
-      map "props", to: :property, render_empty: true
-      map "parts", to: :part, render_empty: true
-      map "links", to: :link, render_empty: true
-    end
-
     def self.metaschema_constraints
       @metaschema_constraints
     end
@@ -9342,51 +11982,43 @@ module Oscal::V1_2_1
       validator = Metaschema::ConstraintValidator.new
       validator.validate(self, self.class.metaschema_constraints)
     end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
   end
-  class Parameter < Base
-    attribute :id, :string
-    attribute :class_attr, :string
-    attribute :depends_on, :string
-    attribute :remarks, :remarks
+  class Action < Base
+    attribute :uuid, :string
+    attribute :date, :string
+    attribute :type, :string
+    attribute :system, :string
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :parameter_constraint, :parameter_constraint, collection: true
-    attribute :parameter_guideline, :parameter_guideline, collection: true
-    attribute :label, :parameter_label
-    attribute :usage, :parameter_usage
-    attribute :parameter_selection, :parameter_selection
-    attribute :parameter_value, :parameter_value, collection: true
+    attribute :responsible_party, :responsible_party, collection: true
+    attribute :remarks, :remarks
 
     xml do
-      element "parameter"
+      element "action"
       ordered
-      map_attribute "id", to: :id
-      map_attribute "class", to: :class_attr
-      map_attribute "depends-on", to: :depends_on
-      map_element "remarks", to: :remarks
+      map_attribute "uuid", to: :uuid
+      map_attribute "date", to: :date
+      map_attribute "type", to: :type
+      map_attribute "system", to: :system
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "constraint", to: :parameter_constraint
-      map_element "guideline", to: :parameter_guideline
-      map_element "label", to: :label
-      map_element "usage", to: :usage
-      map_element "value", to: :parameter_value
-      map_element "select", to: :parameter_selection
+      map_element "responsible-party", to: :responsible_party
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "id", to: :id
-      map "class", to: :class_attr
-      map "depends-on", to: :depends_on
+      map "uuid", to: :uuid
+      map "date", to: :date
+      map "type", to: :type
+      map "system", to: :system
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "label", to: :label, render_empty: true
-      map "usage", to: :usage, render_empty: true
-      map "values", to: :parameter_value, with: { to: :json_to_parameter_value_values, from: :json_from_parameter_value_values }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
-      map "constraints", to: :parameter_constraint, render_empty: true
-      map "guidelines", to: :parameter_guideline, render_empty: true
-      map "select", to: :parameter_selection, with: { to: :json_assembly_soa_to_parameter_selection_select, from: :json_assembly_soa_from_parameter_selection_select }
+      map "responsible-parties", to: :responsible_party, render_empty: true
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -9408,7 +12040,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -9419,6 +12053,266 @@ module Oscal::V1_2_1
       end
     end
 
+    def self.metaschema_constraints
+      @metaschema_constraints
+    end
+
+    def validate_constraints
+      validator = Metaschema::ConstraintValidator.new
+      validator.validate(self, self.class.metaschema_constraints)
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class BackMatter < Base
+    attribute :resource, :back_matter_resource, collection: true
+
+    xml do
+      element "back-matter"
+      ordered
+      map_element "resource", to: :resource
+    end
+
+    key_value do
+      map "resources", to: :resource, render_empty: true
+    end
+
+    def self.metaschema_constraints
+      @metaschema_constraints
+    end
+
+    def validate_constraints
+      validator = Metaschema::ConstraintValidator.new
+      validator.validate(self, self.class.metaschema_constraints)
+    end
+  end
+  class ResponsibleRole < Base
+    attribute :role_id, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :party_uuid, :party_uuid, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "responsible-role"
+      ordered
+      map_attribute "role-id", to: :role_id
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "party-uuid", to: :party_uuid
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "role-id", to: :role_id
+      map "party-uuids", to: :party_uuid, with: { to: :json_to_party_uuid_party_uuids, from: :json_from_party_uuid_party_uuids }
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "props", to: :property, render_empty: true
+      map "links", to: :link, render_empty: true
+    end
+
+    def json_from_party_uuid_party_uuids(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::PartyUuid.of_json(v) }
+        instance.instance_variable_set(:@party_uuid, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::PartyUuid.new(content: "")
+          instance.instance_variable_set(:@party_uuid, inst)
+        else
+          instance.instance_variable_set(:@party_uuid, Oscal::V1_2_1::PartyUuid.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@party_uuid, Oscal::V1_2_1::PartyUuid.of_json(value))
+      end
+    end
+
+    def json_to_party_uuid_party_uuids(instance, doc)
+      current = instance.instance_variable_get(:@party_uuid)
+      if current.is_a?(Array)
+        doc["party-uuids"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::PartyUuid.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["party-uuids"] = Oscal::V1_2_1::PartyUuid.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["party-uuids"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
+      end
+    end
+
+    def validate_occurrences
+      Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
+    end
+  end
+  class Part < Base
+    attribute :id, :string
+    attribute :name, :string
+    attribute :ns, :string
+    attribute :class_attr, :string
+    attribute :title, :part_title
+    attribute :property, :property, collection: true
+    attribute :prose, :part_prose
+    attribute :part, :part, collection: true
+    attribute :link, :link, collection: true
+
+    xml do
+      element "part"
+      ordered
+      map_attribute "id", to: :id
+      map_attribute "name", to: :name
+      map_attribute "ns", to: :ns
+      map_attribute "class", to: :class_attr
+      map_element "title", to: :title
+      map_element "prop", to: :property
+      map_element "prose", to: :prose
+      map_element "part", to: :part
+      map_element "link", to: :link
+    end
+
+    key_value do
+      map "id", to: :id
+      map "name", to: :name
+      map "ns", to: :ns
+      map "class", to: :class_attr
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "prose", to: :prose, with: { to: :json_md_to_prose_prose, from: :json_md_from_prose_prose }
+      map "props", to: :property, render_empty: true
+      map "parts", to: :part, render_empty: true
+      map "links", to: :link, render_empty: true
+    end
+
+    def json_md_from_prose_prose(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PartProse, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PartProse, value)
+               end
+      instance.instance_variable_set(:@prose, parsed)
+    end
+
+    def json_md_to_prose_prose(instance, doc)
+      current = instance.instance_variable_get(:@prose)
+      return if current.nil?
+      doc["prose"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PartTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PartTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def self.metaschema_constraints
+      @metaschema_constraints
+    end
+
+    def validate_constraints
+      validator = Metaschema::ConstraintValidator.new
+      validator.validate(self, self.class.metaschema_constraints)
+    end
+  end
+  class Parameter < Base
+    attribute :id, :string
+    attribute :class_attr, :string
+    attribute :depends_on, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :label, :parameter_label
+    attribute :usage, :parameter_usage
+    attribute :parameter_constraint, :parameter_constraint, collection: true
+    attribute :parameter_guideline, :parameter_guideline, collection: true
+    attribute :parameter_selection, :parameter_selection
+    attribute :parameter_value, :parameter_value, collection: true
+    attribute :remarks, :remarks
+
+    xml do
+      element "parameter"
+      ordered
+      map_attribute "id", to: :id
+      map_attribute "class", to: :class_attr
+      map_attribute "depends-on", to: :depends_on
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "label", to: :label
+      map_element "usage", to: :usage
+      map_element "constraint", to: :parameter_constraint
+      map_element "guideline", to: :parameter_guideline
+      map_element "value", to: :parameter_value
+      map_element "select", to: :parameter_selection
+      map_element "remarks", to: :remarks
+    end
+
+    key_value do
+      map "id", to: :id
+      map "class", to: :class_attr
+      map "depends-on", to: :depends_on
+      map "values", to: :parameter_value, with: { to: :json_to_parameter_value_values, from: :json_from_parameter_value_values }
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "label", to: :label, with: { to: :json_md_to_label_label, from: :json_md_from_label_label }
+      map "usage", to: :usage, with: { to: :json_md_to_usage_usage, from: :json_md_from_usage_usage }
+      map "props", to: :property, render_empty: true
+      map "links", to: :link, render_empty: true
+      map "constraints", to: :parameter_constraint, render_empty: true
+      map "guidelines", to: :parameter_guideline, render_empty: true
+      map "select", to: :parameter_selection, with: { to: :json_assembly_soa_to_parameter_selection_select, from: :json_assembly_soa_from_parameter_selection_select }
+    end
+
     def json_assembly_soa_from_parameter_selection_select(instance, value)
       items = case value
               when Hash then [value]
@@ -9426,35 +12320,61 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ParameterSelection.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@parameter_selection, parsed)
-    end
-
-    def json_to_parameter_value_values(instance, doc)
-      current = instance.instance_variable_get(:@parameter_value)
-      if current.is_a?(Array)
-        doc["values"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["values"] = Oscal::V1_2_1::ParameterValue.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["values"] = val
-        end
-      end
+      instance.instance_variable_set(:@parameter_selection, parsed.first)
     end
 
     def json_assembly_soa_to_parameter_selection_select(instance, doc)
       current = instance.instance_variable_get(:@parameter_selection)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ParameterSelection.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ParameterSelection.as_json(item)
+        else
+          item
         end
-        doc["select"] = result.length == 1 ? result.first : result
       end
+      doc["select"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_label_label(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterLabel, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterLabel, value)
+               end
+      instance.instance_variable_set(:@label, parsed)
+    end
+
+    def json_md_to_label_label(instance, doc)
+      current = instance.instance_variable_get(:@label)
+      return if current.nil?
+      doc["label"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_usage_usage(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterUsage, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterUsage, value)
+               end
+      instance.instance_variable_set(:@usage, parsed)
+    end
+
+    def json_md_to_usage_usage(instance, doc)
+      current = instance.instance_variable_get(:@usage)
+      return if current.nil?
+      doc["usage"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_parameter_value_values(instance, value)
@@ -9470,6 +12390,54 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@parameter_value, Oscal::V1_2_1::ParameterValue.of_json(value))
+      end
+    end
+
+    def json_to_parameter_value_values(instance, doc)
+      current = instance.instance_variable_get(:@parameter_value)
+      if current.is_a?(Array)
+        doc["values"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::ParameterValue.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["values"] = Oscal::V1_2_1::ParameterValue.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["values"] = val
+        end
+      end
+    end
+
+    def json_from_remarks_remarks(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
+        instance.instance_variable_set(:@remarks, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Remarks.new(content: "")
+          instance.instance_variable_set(:@remarks, inst)
+        else
+          instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -9498,8 +12466,28 @@ module Oscal::V1_2_1
     end
 
     key_value do
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "tests", to: :test, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterConstraintDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterConstraintDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
   end
   class ParameterGuideline < Base
@@ -9512,7 +12500,27 @@ module Oscal::V1_2_1
     end
 
     key_value do
-      map "prose", to: :prose, render_empty: true
+      map "prose", to: :prose, with: { to: :json_md_to_prose_prose, from: :json_md_from_prose_prose }
+    end
+
+    def json_md_from_prose_prose(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterGuidelineProse, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ParameterGuidelineProse, value)
+               end
+      instance.instance_variable_set(:@prose, parsed)
+    end
+
+    def json_md_to_prose_prose(instance, doc)
+      current = instance.instance_variable_get(:@prose)
+      return if current.nil?
+      doc["prose"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
   end
   class ParameterSelection < Base
@@ -9585,20 +12593,6 @@ module Oscal::V1_2_1
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
     end
 
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
-    end
-
     def json_from_remarks_remarks(instance, value)
       if value.is_a?(Array)
         parsed = value.map { |v| Oscal::V1_2_1::Remarks.of_json(v) }
@@ -9612,6 +12606,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -9657,7 +12667,9 @@ module Oscal::V1_2_1
     def json_to_with_id_with_ids(instance, doc)
       current = instance.instance_variable_get(:@with_id)
       if current.is_a?(Array)
-        doc["with-ids"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["with-ids"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::WithId.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["with-ids"] = Oscal::V1_2_1::WithId.as_json(current)
@@ -9696,20 +12708,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -9717,7 +12715,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
+    end
+
+    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
+      current = instance.instance_variable_get(:@back_matter)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
+        end
+      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_metadata_metadata(instance, value)
@@ -9727,21 +12739,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
+      instance.instance_variable_set(:@metadata, parsed.first)
     end
 
-    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
-      current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -9795,35 +12807,55 @@ module Oscal::V1_2_1
   class Control < Base
     attribute :id, :string
     attribute :class_attr, :string
+    attribute :title, :control_title
     attribute :parameter, :parameter, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :part, :part, collection: true
     attribute :control, :control, collection: true
-    attribute :title, :control_title
 
     xml do
       element "control"
       ordered
       map_attribute "id", to: :id
       map_attribute "class", to: :class_attr
+      map_element "title", to: :title
       map_element "param", to: :parameter
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "part", to: :part
       map_element "control", to: :control
-      map_element "title", to: :title
     end
 
     key_value do
       map "id", to: :id
       map "class", to: :class_attr
-      map "title", to: :title, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "params", to: :parameter, render_empty: true
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "parts", to: :part, render_empty: true
       map "controls", to: :control, render_empty: true
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ControlTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ControlTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -9838,11 +12870,11 @@ module Oscal::V1_2_1
   class Group < Base
     attribute :id, :string
     attribute :class_attr, :string
+    attribute :title, :group_title
     attribute :parameter, :parameter, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :part, :part, collection: true
-    attribute :title, :group_title
     attribute :group, :group, collection: true
     attribute :control, :control, collection: true
 
@@ -9851,11 +12883,11 @@ module Oscal::V1_2_1
       ordered
       map_attribute "id", to: :id
       map_attribute "class", to: :class_attr
+      map_element "title", to: :title
       map_element "param", to: :parameter
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "part", to: :part
-      map_element "title", to: :title
       map_element "group", to: :group
       map_element "control", to: :control
     end
@@ -9863,13 +12895,33 @@ module Oscal::V1_2_1
     key_value do
       map "id", to: :id
       map "class", to: :class_attr
-      map "title", to: :title, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "params", to: :parameter, render_empty: true
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "parts", to: :part, render_empty: true
       map "groups", to: :group, render_empty: true
       map "controls", to: :control, render_empty: true
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::GroupTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::GroupTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -9886,15 +12938,15 @@ module Oscal::V1_2_1
     attribute :method_attr, :string
     attribute :matching_rationale, :string
     attribute :status, :string
-    attribute :remarks, :remarks
-    attribute :mapping_description, :mapping_description
-    attribute :coverage, :coverage
     attribute :mapping_resource_reference, :mapping_resource_reference
     attribute :map, :map, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
+    attribute :mapping_description, :mapping_description
     attribute :gap_summary, :gap_summary
     attribute :confidence_score, :confidence_score
+    attribute :coverage, :coverage
 
     xml do
       element "mapping"
@@ -9903,17 +12955,17 @@ module Oscal::V1_2_1
       map_attribute "method", to: :method_attr
       map_attribute "matching-rationale", to: :matching_rationale
       map_attribute "status", to: :status
-      map_element "remarks", to: :remarks
-      map_element "mapping-description", to: :mapping_description
-      map_element "coverage", to: :coverage
       map_element "source-resource", to: :mapping_resource_reference
       map_element "target-resource", to: :mapping_resource_reference
       map_element "map", to: :map
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
+      map_element "mapping-description", to: :mapping_description
       map_element "source-gap-summary", to: :gap_summary
       map_element "target-gap-summary", to: :gap_summary
       map_element "confidence-score", to: :confidence_score
+      map_element "coverage", to: :coverage
     end
 
     key_value do
@@ -9934,16 +12986,154 @@ module Oscal::V1_2_1
       map "confidence-score", to: :confidence_score, with: { to: :json_assembly_soa_to_confidence_score_confidence_score, from: :json_assembly_soa_from_confidence_score_confidence_score }
     end
 
-    def json_to_mapping_description_mapping_description(instance, doc)
-      current = instance.instance_variable_get(:@mapping_description)
+    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@confidence_score, parsed.first)
+    end
+
+    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
+      current = instance.instance_variable_get(:@confidence_score)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ConfidenceScore.as_json(item)
+        else
+          item
+        end
+      end
+      doc["confidence-score"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_gap_summary_source_gap_summary(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::GapSummary.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@gap_summary, parsed.first)
+    end
+
+    def json_assembly_soa_to_gap_summary_source_gap_summary(instance, doc)
+      current = instance.instance_variable_get(:@gap_summary)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::GapSummary.as_json(item)
+        else
+          item
+        end
+      end
+      doc["source-gap-summary"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_gap_summary_target_gap_summary(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::GapSummary.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@gap_summary, parsed.first)
+    end
+
+    def json_assembly_soa_to_gap_summary_target_gap_summary(instance, doc)
+      current = instance.instance_variable_get(:@gap_summary)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::GapSummary.as_json(item)
+        else
+          item
+        end
+      end
+      doc["target-gap-summary"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_mapping_resource_reference_source_resource(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::MappingResourceReference.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@mapping_resource_reference, parsed.first)
+    end
+
+    def json_assembly_soa_to_mapping_resource_reference_source_resource(instance, doc)
+      current = instance.instance_variable_get(:@mapping_resource_reference)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MappingResourceReference.as_json(item)
+        else
+          item
+        end
+      end
+      doc["source-resource"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_mapping_resource_reference_target_resource(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::MappingResourceReference.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@mapping_resource_reference, parsed.first)
+    end
+
+    def json_assembly_soa_to_mapping_resource_reference_target_resource(instance, doc)
+      current = instance.instance_variable_get(:@mapping_resource_reference)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MappingResourceReference.as_json(item)
+        else
+          item
+        end
+      end
+      doc["target-resource"] = result.length == 1 ? result.first : result
+    end
+
+    def json_from_coverage_coverage(instance, value)
+      if value.is_a?(Array)
+        parsed = value.map { |v| Oscal::V1_2_1::Coverage.of_json(v) }
+        instance.instance_variable_set(:@coverage, parsed)
+      elsif value.is_a?(Hash)
+        if value.empty?
+          inst = Oscal::V1_2_1::Coverage.new(content: "")
+          instance.instance_variable_set(:@coverage, inst)
+        else
+          instance.instance_variable_set(:@coverage, Oscal::V1_2_1::Coverage.of_json(value))
+        end
+      elsif value
+        instance.instance_variable_set(:@coverage, Oscal::V1_2_1::Coverage.of_json(value))
+      end
+    end
+
+    def json_to_coverage_coverage(instance, doc)
+      current = instance.instance_variable_get(:@coverage)
       if current.is_a?(Array)
-        doc["mapping-description"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["coverage"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Coverage.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
-          doc["mapping-description"] = Oscal::V1_2_1::MappingDescription.as_json(current)
+          doc["coverage"] = Oscal::V1_2_1::Coverage.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
-          doc["mapping-description"] = val
+          doc["coverage"] = val
         end
       end
     end
@@ -9961,6 +13151,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@mapping_description, Oscal::V1_2_1::MappingDescription.of_json(value))
+      end
+    end
+
+    def json_to_mapping_description_mapping_description(instance, doc)
+      current = instance.instance_variable_get(:@mapping_description)
+      if current.is_a?(Array)
+        doc["mapping-description"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::MappingDescription.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["mapping-description"] = Oscal::V1_2_1::MappingDescription.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["mapping-description"] = val
+        end
       end
     end
 
@@ -9983,7 +13189,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -9991,156 +13199,6 @@ module Oscal::V1_2_1
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
         end
-      end
-    end
-
-    def json_to_coverage_coverage(instance, doc)
-      current = instance.instance_variable_get(:@coverage)
-      if current.is_a?(Array)
-        doc["coverage"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["coverage"] = Oscal::V1_2_1::Coverage.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["coverage"] = val
-        end
-      end
-    end
-
-    def json_assembly_soa_from_mapping_resource_reference_source_resource(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::MappingResourceReference.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@mapping_resource_reference, parsed)
-    end
-
-    def json_assembly_soa_to_mapping_resource_reference_source_resource(instance, doc)
-      current = instance.instance_variable_get(:@mapping_resource_reference)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MappingResourceReference.as_json(item)
-          else
-            item
-          end
-        end
-        doc["source-resource"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_mapping_resource_reference_target_resource(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::MappingResourceReference.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@mapping_resource_reference, parsed)
-    end
-
-    def json_from_coverage_coverage(instance, value)
-      if value.is_a?(Array)
-        parsed = value.map { |v| Oscal::V1_2_1::Coverage.of_json(v) }
-        instance.instance_variable_set(:@coverage, parsed)
-      elsif value.is_a?(Hash)
-        if value.empty?
-          inst = Oscal::V1_2_1::Coverage.new(content: "")
-          instance.instance_variable_set(:@coverage, inst)
-        else
-          instance.instance_variable_set(:@coverage, Oscal::V1_2_1::Coverage.of_json(value))
-        end
-      elsif value
-        instance.instance_variable_set(:@coverage, Oscal::V1_2_1::Coverage.of_json(value))
-      end
-    end
-
-    def json_assembly_soa_from_gap_summary_source_gap_summary(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::GapSummary.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@gap_summary, parsed)
-    end
-
-    def json_assembly_soa_from_gap_summary_target_gap_summary(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::GapSummary.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@gap_summary, parsed)
-    end
-
-    def json_assembly_soa_to_gap_summary_target_gap_summary(instance, doc)
-      current = instance.instance_variable_get(:@gap_summary)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::GapSummary.as_json(item)
-          else
-            item
-          end
-        end
-        doc["target-gap-summary"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_to_mapping_resource_reference_target_resource(instance, doc)
-      current = instance.instance_variable_get(:@mapping_resource_reference)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MappingResourceReference.as_json(item)
-          else
-            item
-          end
-        end
-        doc["target-resource"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
-      current = instance.instance_variable_get(:@confidence_score)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ConfidenceScore.as_json(item)
-          else
-            item
-          end
-        end
-        doc["confidence-score"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@confidence_score, parsed)
-    end
-
-    def json_assembly_soa_to_gap_summary_source_gap_summary(instance, doc)
-      current = instance.instance_variable_get(:@gap_summary)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::GapSummary.as_json(item)
-          else
-            item
-          end
-        end
-        doc["source-gap-summary"] = result.length == 1 ? result.first : result
       end
     end
 
@@ -10152,9 +13210,9 @@ module Oscal::V1_2_1
     attribute :ns, :string
     attribute :type, :string
     attribute :href, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "mapping-resource-reference"
@@ -10162,9 +13220,9 @@ module Oscal::V1_2_1
       map_attribute "ns", to: :ns
       map_attribute "type", to: :type
       map_attribute "href", to: :href
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -10195,7 +13253,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -10214,14 +13274,14 @@ module Oscal::V1_2_1
     attribute :uuid, :string
     attribute :ns, :string
     attribute :matching_rationale, :string
-    attribute :coverage, :coverage
-    attribute :remarks, :remarks
+    attribute :relationship, :string
     attribute :mapping_item, :mapping_item, collection: true
     attribute :qualifier_item, :qualifier_item, collection: true
     attribute :confidence_score, :confidence_score
+    attribute :coverage, :coverage
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :relationship, :string
+    attribute :remarks, :remarks
 
     xml do
       element "map"
@@ -10229,15 +13289,15 @@ module Oscal::V1_2_1
       map_attribute "uuid", to: :uuid
       map_attribute "ns", to: :ns
       map_attribute "matching-rationale", to: :matching_rationale
-      map_element "coverage", to: :coverage
-      map_element "remarks", to: :remarks
+      map_element "relationship", to: :relationship
       map_element "source", to: :mapping_item
       map_element "target", to: :mapping_item
       map_element "qualifier", to: :qualifier_item
       map_element "confidence-score", to: :confidence_score
+      map_element "coverage", to: :coverage
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "relationship", to: :relationship
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -10253,6 +13313,30 @@ module Oscal::V1_2_1
       map "links", to: :link, render_empty: true
       map "relationship", to: :relationship, with: { to: :json_soa_to_relationship_relationship, from: :json_soa_from_relationship_relationship }
       map "confidence-score", to: :confidence_score, with: { to: :json_assembly_soa_to_confidence_score_confidence_score, from: :json_assembly_soa_from_confidence_score_confidence_score }
+    end
+
+    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@confidence_score, parsed.first)
+    end
+
+    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
+      current = instance.instance_variable_get(:@confidence_score)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ConfidenceScore.as_json(item)
+        else
+          item
+        end
+      end
+      doc["confidence-score"] = result.length == 1 ? result.first : result
     end
 
     def json_from_coverage_coverage(instance, value)
@@ -10274,7 +13358,9 @@ module Oscal::V1_2_1
     def json_to_coverage_coverage(instance, doc)
       current = instance.instance_variable_get(:@coverage)
       if current.is_a?(Array)
-        doc["coverage"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["coverage"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Coverage.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["coverage"] = Oscal::V1_2_1::Coverage.as_json(current)
@@ -10304,7 +13390,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -10334,30 +13422,6 @@ module Oscal::V1_2_1
         end
         doc["relationship"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
-      current = instance.instance_variable_get(:@confidence_score)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ConfidenceScore.as_json(item)
-          else
-            item
-          end
-        end
-        doc["confidence-score"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@confidence_score, parsed)
     end
 
     def validate_occurrences
@@ -10419,7 +13483,9 @@ module Oscal::V1_2_1
     def json_to_percentage_percentage(instance, doc)
       current = instance.instance_variable_get(:@percentage)
       if current.is_a?(Array)
-        doc["percentage"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["percentage"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Percentage.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["percentage"] = Oscal::V1_2_1::Percentage.as_json(current)
@@ -10433,18 +13499,18 @@ module Oscal::V1_2_1
   class MappingItem < Base
     attribute :type, :string
     attribute :id_ref, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "mapping-item"
       ordered
       map_attribute "type", to: :type
       map_attribute "id-ref", to: :id_ref
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -10474,7 +13540,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -10493,8 +13561,8 @@ module Oscal::V1_2_1
     attribute :subject, :string
     attribute :predicate, :string
     attribute :category, :string
-    attribute :remarks, :remarks
     attribute :description, :qualifier_item_description
+    attribute :remarks, :remarks
 
     xml do
       element "qualifier-item"
@@ -10502,8 +13570,8 @@ module Oscal::V1_2_1
       map_attribute "subject", to: :subject
       map_attribute "predicate", to: :predicate
       map_attribute "category", to: :category
-      map_element "remarks", to: :remarks
       map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -10511,7 +13579,27 @@ module Oscal::V1_2_1
       map "predicate", to: :predicate
       map "category", to: :category
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::QualifierItemDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::QualifierItemDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -10533,7 +13621,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -10552,13 +13642,13 @@ module Oscal::V1_2_1
     attribute :method_attr, :string
     attribute :matching_rationale, :string
     attribute :status, :string
+    attribute :confidence_score, :confidence_score
     attribute :coverage, :coverage
     attribute :mapping_description, :mapping_description
-    attribute :remarks, :remarks
-    attribute :confidence_score, :confidence_score
     attribute :responsible_party, :responsible_party, collection: true
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "mapping-provenance"
@@ -10566,13 +13656,13 @@ module Oscal::V1_2_1
       map_attribute "method", to: :method_attr
       map_attribute "matching-rationale", to: :matching_rationale
       map_attribute "status", to: :status
+      map_element "confidence-score", to: :confidence_score
       map_element "coverage", to: :coverage
       map_element "mapping-description", to: :mapping_description
-      map_element "remarks", to: :remarks
-      map_element "confidence-score", to: :confidence_score
       map_element "responsible-party", to: :responsible_party
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -10586,6 +13676,30 @@ module Oscal::V1_2_1
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "confidence-score", to: :confidence_score, with: { to: :json_assembly_soa_to_confidence_score_confidence_score, from: :json_assembly_soa_from_confidence_score_confidence_score }
+    end
+
+    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@confidence_score, parsed.first)
+    end
+
+    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
+      current = instance.instance_variable_get(:@confidence_score)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ConfidenceScore.as_json(item)
+        else
+          item
+        end
+      end
+      doc["confidence-score"] = result.length == 1 ? result.first : result
     end
 
     def json_from_coverage_coverage(instance, value)
@@ -10607,7 +13721,9 @@ module Oscal::V1_2_1
     def json_to_coverage_coverage(instance, doc)
       current = instance.instance_variable_get(:@coverage)
       if current.is_a?(Array)
-        doc["coverage"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["coverage"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Coverage.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["coverage"] = Oscal::V1_2_1::Coverage.as_json(current)
@@ -10637,7 +13753,9 @@ module Oscal::V1_2_1
     def json_to_mapping_description_mapping_description(instance, doc)
       current = instance.instance_variable_get(:@mapping_description)
       if current.is_a?(Array)
-        doc["mapping-description"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["mapping-description"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::MappingDescription.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["mapping-description"] = Oscal::V1_2_1::MappingDescription.as_json(current)
@@ -10667,7 +13785,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -10675,30 +13795,6 @@ module Oscal::V1_2_1
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
         end
-      end
-    end
-
-    def json_assembly_soa_from_confidence_score_confidence_score(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ConfidenceScore.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@confidence_score, parsed)
-    end
-
-    def json_assembly_soa_to_confidence_score_confidence_score(instance, doc)
-      current = instance.instance_variable_get(:@confidence_score)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ConfidenceScore.as_json(item)
-          else
-            item
-          end
-        end
-        doc["confidence-score"] = result.length == 1 ? result.first : result
       end
     end
 
@@ -10731,30 +13827,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -10762,45 +13834,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
     def json_assembly_soa_to_back_matter_back_matter(instance, doc)
       current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_from_mapping_provenance_provenance(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::MappingProvenance.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@mapping_provenance, parsed)
-    end
-
-    def json_assembly_soa_to_mapping_provenance_provenance(instance, doc)
-      current = instance.instance_variable_get(:@mapping_provenance)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MappingProvenance.as_json(item)
-          else
-            item
-          end
-        end
-        doc["provenance"] = result.length == 1 ? result.first : result
-      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_mapping_mappings(instance, value)
@@ -10815,16 +13863,64 @@ module Oscal::V1_2_1
 
     def json_assembly_soa_to_mapping_mappings(instance, doc)
       current = instance.instance_variable_get(:@mapping)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Mapping.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Mapping.as_json(item)
+        else
+          item
         end
-        doc["mappings"] = result.length == 1 ? result.first : result
       end
+      doc["mappings"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_mapping_provenance_provenance(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::MappingProvenance.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@mapping_provenance, parsed.first)
+    end
+
+    def json_assembly_soa_to_mapping_provenance_provenance(instance, doc)
+      current = instance.instance_variable_get(:@mapping_provenance)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MappingProvenance.as_json(item)
+        else
+          item
+        end
+      end
+      doc["provenance"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -10894,44 +13990,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
-      current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
-        end
-        doc["back-matter"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -10939,7 +13997,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
+    end
+
+    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
+      current = instance.instance_variable_get(:@back_matter)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
+        end
+      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_merge_merge(instance, value)
@@ -10949,21 +14021,45 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::Merge.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@merge, parsed)
+      instance.instance_variable_set(:@merge, parsed.first)
     end
 
     def json_assembly_soa_to_merge_merge(instance, doc)
       current = instance.instance_variable_get(:@merge)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Merge.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Merge.as_json(item)
+        else
+          item
         end
-        doc["merge"] = result.length == 1 ? result.first : result
       end
+      doc["merge"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_modify_modify(instance, value)
@@ -10973,21 +14069,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::Modify.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@modify, parsed)
+      instance.instance_variable_set(:@modify, parsed.first)
     end
 
     def json_assembly_soa_to_modify_modify(instance, doc)
       current = instance.instance_variable_get(:@modify)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Modify.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Modify.as_json(item)
+        else
+          item
         end
-        doc["modify"] = result.length == 1 ? result.first : result
       end
+      doc["modify"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -11031,16 +14127,16 @@ module Oscal::V1_2_1
   end
   class Import < Base
     attribute :href, :string
-    attribute :select_control_by_id, :select_control_by_id, collection: true
     attribute :include_all, :include_all
+    attribute :select_control_by_id, :select_control_by_id, collection: true
 
     xml do
       element "import"
       ordered
       map_attribute "href", to: :href
-      map_element "exclude-controls", to: :select_control_by_id
       map_element "include-all", to: :include_all
       map_element "include-controls", to: :select_control_by_id
+      map_element "exclude-controls", to: :select_control_by_id
     end
 
     key_value do
@@ -11057,21 +14153,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::IncludeAll.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@include_all, parsed)
+      instance.instance_variable_set(:@include_all, parsed.first)
     end
 
     def json_assembly_soa_to_include_all_include_all(instance, doc)
       current = instance.instance_variable_get(:@include_all)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::IncludeAll.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::IncludeAll.as_json(item)
+        else
+          item
         end
-        doc["include-all"] = result.length == 1 ? result.first : result
       end
+      doc["include-all"] = result.length == 1 ? result.first : result
     end
   end
   class Merge < Base
@@ -11103,45 +14199,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::MergeCombine.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@combine, parsed)
+      instance.instance_variable_set(:@combine, parsed.first)
     end
 
     def json_assembly_soa_to_combine_combine(instance, doc)
       current = instance.instance_variable_get(:@combine)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MergeCombine.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MergeCombine.as_json(item)
+        else
+          item
         end
-        doc["combine"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_from_flat_flat(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::MergeFlat.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@flat, parsed)
-    end
-
-    def json_assembly_soa_to_flat_flat(instance, doc)
-      current = instance.instance_variable_get(:@flat)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MergeFlat.as_json(item)
-          else
-            item
-          end
-        end
-        doc["flat"] = result.length == 1 ? result.first : result
-      end
+      doc["combine"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_custom_custom(instance, value)
@@ -11151,21 +14223,45 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::MergeCustom.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@custom, parsed)
+      instance.instance_variable_set(:@custom, parsed.first)
     end
 
     def json_assembly_soa_to_custom_custom(instance, doc)
       current = instance.instance_variable_get(:@custom)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::MergeCustom.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MergeCustom.as_json(item)
+        else
+          item
         end
-        doc["custom"] = result.length == 1 ? result.first : result
       end
+      doc["custom"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_flat_flat(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::MergeFlat.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@flat, parsed.first)
+    end
+
+    def json_assembly_soa_to_flat_flat(instance, doc)
+      current = instance.instance_variable_get(:@flat)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::MergeFlat.as_json(item)
+        else
+          item
+        end
+      end
+      doc["flat"] = result.length == 1 ? result.first : result
     end
   end
   class Modify < Base
@@ -11195,16 +14291,16 @@ module Oscal::V1_2_1
   end
   class InsertControls < Base
     attribute :order, :string
-    attribute :select_control_by_id, :select_control_by_id, collection: true
     attribute :include_all, :include_all
+    attribute :select_control_by_id, :select_control_by_id, collection: true
 
     xml do
       element "insert-controls"
       ordered
       map_attribute "order", to: :order
-      map_element "exclude-controls", to: :select_control_by_id
       map_element "include-all", to: :include_all
       map_element "include-controls", to: :select_control_by_id
+      map_element "exclude-controls", to: :select_control_by_id
     end
 
     key_value do
@@ -11221,64 +14317,148 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::IncludeAll.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@include_all, parsed)
+      instance.instance_variable_set(:@include_all, parsed.first)
     end
 
     def json_assembly_soa_to_include_all_include_all(instance, doc)
       current = instance.instance_variable_get(:@include_all)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::IncludeAll.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::IncludeAll.as_json(item)
+        else
+          item
         end
-        doc["include-all"] = result.length == 1 ? result.first : result
       end
+      doc["include-all"] = result.length == 1 ? result.first : result
     end
   end
   class SystemComponent < Base
     attribute :uuid, :string
     attribute :system_component_type, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :responsible_role, :responsible_role, collection: true
-    attribute :protocol, :protocol, collection: true
     attribute :title, :system_component_title
     attribute :description, :system_component_description
     attribute :purpose, :system_component_purpose
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :status, :system_component_status
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :protocol, :protocol, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "system-component"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "system-component-type", to: :system_component_type
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "responsible-role", to: :responsible_role
-      map_element "protocol", to: :protocol
       map_element "title", to: :title
       map_element "description", to: :description
       map_element "purpose", to: :purpose
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "status", to: :status
+      map_element "responsible-role", to: :responsible_role
+      map_element "protocol", to: :protocol
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "system-component-type", to: :system_component_type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
-      map "purpose", to: :purpose, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+      map "purpose", to: :purpose, with: { to: :json_md_to_purpose_purpose, from: :json_md_from_purpose_purpose }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-roles", to: :responsible_role, render_empty: true
       map "protocols", to: :protocol, render_empty: true
       map "status", to: :status, with: { to: :json_assembly_soa_to_status_status, from: :json_assembly_soa_from_status_status }
+    end
+
+    def json_assembly_soa_from_status_status(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::SystemComponentStatus.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@status, parsed.first)
+    end
+
+    def json_assembly_soa_to_status_status(instance, doc)
+      current = instance.instance_variable_get(:@status)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::SystemComponentStatus.as_json(item)
+        else
+          item
+        end
+      end
+      doc["status"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_purpose_purpose(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentPurpose, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentPurpose, value)
+               end
+      instance.instance_variable_set(:@purpose, parsed)
+    end
+
+    def json_md_to_purpose_purpose(instance, doc)
+      current = instance.instance_variable_get(:@purpose)
+      return if current.nil?
+      doc["purpose"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemComponentTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -11300,7 +14480,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11308,30 +14490,6 @@ module Oscal::V1_2_1
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
         end
-      end
-    end
-
-    def json_assembly_soa_from_status_status(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::SystemComponentStatus.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@status, parsed)
-    end
-
-    def json_assembly_soa_to_status_status(instance, doc)
-      current = instance.instance_variable_get(:@status)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::SystemComponentStatus.as_json(item)
-          else
-            item
-          end
-        end
-        doc["status"] = result.length == 1 ? result.first : result
       end
     end
 
@@ -11351,23 +14509,43 @@ module Oscal::V1_2_1
   class Protocol < Base
     attribute :uuid, :string
     attribute :name, :string
-    attribute :port_range, :port_range, collection: true
     attribute :title, :protocol_title
+    attribute :port_range, :port_range, collection: true
 
     xml do
       element "protocol"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "name", to: :name
-      map_element "port-range", to: :port_range
       map_element "title", to: :title
+      map_element "port-range", to: :port_range
     end
 
     key_value do
       map "uuid", to: :uuid
       map "name", to: :name
-      map "title", to: :title, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "port-ranges", to: :port_range, render_empty: true
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ProtocolTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ProtocolTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -11420,7 +14598,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11479,7 +14659,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11496,53 +14678,79 @@ module Oscal::V1_2_1
   end
   class SystemUser < Base
     attribute :uuid, :string
-    attribute :role_id, :role_id, collection: true
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :authorized_privilege, :authorized_privilege, collection: true
     attribute :title, :system_user_title
     attribute :short_name, :string
     attribute :description, :system_user_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :role_id, :role_id, collection: true
+    attribute :authorized_privilege, :authorized_privilege, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "system-user"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "role-id", to: :role_id
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "authorized-privilege", to: :authorized_privilege
       map_element "title", to: :title
       map_element "short-name", to: :short_name
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "role-id", to: :role_id
+      map_element "authorized-privilege", to: :authorized_privilege
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
+      map "short-name", to: :short_name, render_empty: true
       map "role-ids", to: :role_id, with: { to: :json_to_role_id_role_ids, from: :json_from_role_id_role_ids }
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "short-name", to: :short_name, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "authorized-privileges", to: :authorized_privilege, render_empty: true
     end
 
-    def json_to_role_id_role_ids(instance, doc)
-      current = instance.instance_variable_get(:@role_id)
-      if current.is_a?(Array)
-        doc["role-ids"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["role-ids"] = Oscal::V1_2_1::RoleId.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["role-ids"] = val
-        end
-      end
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemUserDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemUserDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemUserTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemUserTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -11564,7 +14772,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11591,6 +14801,22 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_role_id_role_ids(instance, doc)
+      current = instance.instance_variable_get(:@role_id)
+      if current.is_a?(Array)
+        doc["role-ids"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RoleId.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["role-ids"] = Oscal::V1_2_1::RoleId.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["role-ids"] = val
+        end
+      end
+    end
+
     def self.metaschema_constraints
       @metaschema_constraints
     end
@@ -11605,22 +14831,22 @@ module Oscal::V1_2_1
     end
   end
   class AuthorizedPrivilege < Base
-    attribute :function_performed, :function_performed, collection: true
     attribute :title, :authorized_privilege_title
     attribute :description, :authorized_privilege_description
+    attribute :function_performed, :function_performed, collection: true
 
     xml do
       element "authorized-privilege"
       ordered
-      map_element "function-performed", to: :function_performed
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "function-performed", to: :function_performed
     end
 
     key_value do
       map "functions-performed", to: :function_performed, with: { to: :json_to_function_performed_functions_performed, from: :json_from_function_performed_functions_performed }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
     end
 
     def json_from_function_performed_functions_performed(instance, value)
@@ -11642,7 +14868,9 @@ module Oscal::V1_2_1
     def json_to_function_performed_functions_performed(instance, doc)
       current = instance.instance_variable_get(:@function_performed)
       if current.is_a?(Array)
-        doc["functions-performed"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["functions-performed"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::FunctionPerformed.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["functions-performed"] = Oscal::V1_2_1::FunctionPerformed.as_json(current)
@@ -11653,39 +14881,99 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizedPrivilegeDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizedPrivilegeDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizedPrivilegeTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizedPrivilegeTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class InventoryItem < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :description, :inventory_item_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_party, :responsible_party, collection: true
-    attribute :description, :inventory_item_description
     attribute :implemented_component, :inventory_item_implemented_component, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "inventory-item"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-party", to: :responsible_party
-      map_element "description", to: :description
       map_element "implemented-component", to: :implemented_component
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-parties", to: :responsible_party, render_empty: true
       map "implemented-components", to: :implemented_component, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::InventoryItemDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::InventoryItemDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -11707,7 +14995,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11733,21 +15023,21 @@ module Oscal::V1_2_1
   end
   class SetParameter < Base
     attribute :param_id, :string
-    attribute :remarks, :remarks
     attribute :value, :string, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "set-parameter"
       ordered
       map_attribute "param-id", to: :param_id
-      map_element "remarks", to: :remarks
       map_element "value", to: :value
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "param-id", to: :param_id
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "value", to: :value, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -11769,7 +15059,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11812,30 +15104,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -11843,21 +15111,45 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
     def json_assembly_soa_to_back_matter_back_matter(instance, doc)
       current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
+      doc["back-matter"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -11943,7 +15235,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -11961,44 +15255,104 @@ module Oscal::V1_2_1
   class DefinedComponent < Base
     attribute :uuid, :string
     attribute :defined_component_type, :string
-    attribute :remarks, :remarks
+    attribute :title, :defined_component_title
+    attribute :description, :defined_component_description
+    attribute :purpose, :defined_component_purpose
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
     attribute :protocol, :protocol, collection: true
     attribute :control_implementation, :control_implementation, collection: true
-    attribute :title, :defined_component_title
-    attribute :description, :defined_component_description
-    attribute :purpose, :defined_component_purpose
+    attribute :remarks, :remarks
 
     xml do
       element "defined-component"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "defined-component-type", to: :defined_component_type
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
+      map_element "description", to: :description
+      map_element "purpose", to: :purpose
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-role", to: :responsible_role
       map_element "protocol", to: :protocol
       map_element "control-implementation", to: :control_implementation
-      map_element "title", to: :title
-      map_element "description", to: :description
-      map_element "purpose", to: :purpose
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "defined-component-type", to: :defined_component_type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
-      map "purpose", to: :purpose, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+      map "purpose", to: :purpose, with: { to: :json_md_to_purpose_purpose, from: :json_md_from_purpose_purpose }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-roles", to: :responsible_role, render_empty: true
       map "protocols", to: :protocol, render_empty: true
       map "control-implementations", to: :control_implementation, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_purpose_purpose(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentPurpose, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentPurpose, value)
+               end
+      instance.instance_variable_set(:@purpose, parsed)
+    end
+
+    def json_md_to_purpose_purpose(instance, doc)
+      current = instance.instance_variable_get(:@purpose)
+      return if current.nil?
+      doc["purpose"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DefinedComponentTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -12020,7 +15374,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -12047,35 +15403,55 @@ module Oscal::V1_2_1
   class Capability < Base
     attribute :uuid, :string
     attribute :name, :string
-    attribute :remarks, :remarks
+    attribute :description, :capability_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :incorporates_component, :incorporates_component, collection: true
     attribute :control_implementation, :control_implementation, collection: true
-    attribute :description, :capability_description
+    attribute :remarks, :remarks
 
     xml do
       element "capability"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "name", to: :name
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "incorporates-component", to: :incorporates_component
       map_element "control-implementation", to: :control_implementation
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "name", to: :name
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "incorporates-components", to: :incorporates_component, render_empty: true
       map "control-implementations", to: :control_implementation, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::CapabilityDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::CapabilityDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -12097,7 +15473,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -12124,32 +15502,52 @@ module Oscal::V1_2_1
   class ControlImplementation < Base
     attribute :uuid, :string
     attribute :source, :string
+    attribute :description, :control_implementation_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :set_parameter, :set_parameter, collection: true
     attribute :implemented_requirement, :implemented_requirement, collection: true
-    attribute :description, :control_implementation_description
 
     xml do
       element "control-implementation"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "source", to: :source
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "set-parameter", to: :set_parameter
       map_element "implemented-requirement", to: :implemented_requirement
-      map_element "description", to: :description
     end
 
     key_value do
       map "uuid", to: :uuid
       map "source", to: :source
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "set-parameters", to: :set_parameter, render_empty: true
       map "implemented-requirements", to: :implemented_requirement, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ControlImplementationDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ControlImplementationDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -12178,44 +15576,84 @@ module Oscal::V1_2_1
 
     key_value do
       map "component-uuid", to: :component_uuid
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::IncorporatesComponentDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::IncorporatesComponentDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
   end
   class ImplementedRequirement < Base
     attribute :uuid, :string
     attribute :control_id, :string
-    attribute :remarks, :remarks
+    attribute :description, :implemented_requirement_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :set_parameter, :set_parameter, collection: true
     attribute :responsible_role, :responsible_role, collection: true
     attribute :statement, :statement, collection: true
-    attribute :description, :implemented_requirement_description
+    attribute :remarks, :remarks
 
     xml do
       element "implemented-requirement"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "control-id", to: :control_id
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "set-parameter", to: :set_parameter
       map_element "responsible-role", to: :responsible_role
       map_element "statement", to: :statement
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "control-id", to: :control_id
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "set-parameters", to: :set_parameter, render_empty: true
       map "responsible-roles", to: :responsible_role, render_empty: true
       map "statements", to: :statement, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ImplementedRequirementDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ImplementedRequirementDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -12237,7 +15675,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -12264,46 +15704,52 @@ module Oscal::V1_2_1
   class Statement < Base
     attribute :uuid, :string
     attribute :statement_id, :string
-    attribute :remarks, :remarks
+    attribute :description, :statement_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_role, :responsible_role, collection: true
-    attribute :description, :statement_description
+    attribute :remarks, :remarks
 
     xml do
       element "statement"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "statement-id", to: :statement_id
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-role", to: :responsible_role
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "statement-id", to: :statement_id
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-roles", to: :responsible_role, render_empty: true
     end
 
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::StatementDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::StatementDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -12319,6 +15765,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -12366,30 +15828,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -12397,79 +15835,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
     def json_assembly_soa_to_back_matter_back_matter(instance, doc)
       current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_from_import_profile_import_profile(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ImportProfile.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@import_profile, parsed)
-    end
-
-    def json_assembly_soa_from_system_characteristics_system_characteristics(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::SystemCharacteristics.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@system_characteristics, parsed)
-    end
-
-    def json_assembly_soa_to_system_characteristics_system_characteristics(instance, doc)
-      current = instance.instance_variable_get(:@system_characteristics)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::SystemCharacteristics.as_json(item)
-          else
-            item
-          end
-        end
-        doc["system-characteristics"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_system_implementation_system_implementation(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::SystemImplementation.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@system_implementation, parsed)
-    end
-
-    def json_assembly_soa_to_system_implementation_system_implementation(instance, doc)
-      current = instance.instance_variable_get(:@system_implementation)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::SystemImplementation.as_json(item)
-          else
-            item
-          end
-        end
-        doc["system-implementation"] = result.length == 1 ? result.first : result
-      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_control_implementation_control_implementation(instance, value)
@@ -12479,35 +15859,117 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ControlImplementation.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@control_implementation, parsed)
-    end
-
-    def json_assembly_soa_to_import_profile_import_profile(instance, doc)
-      current = instance.instance_variable_get(:@import_profile)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImportProfile.as_json(item)
-          else
-            item
-          end
-        end
-        doc["import-profile"] = result.length == 1 ? result.first : result
-      end
+      instance.instance_variable_set(:@control_implementation, parsed.first)
     end
 
     def json_assembly_soa_to_control_implementation_control_implementation(instance, doc)
       current = instance.instance_variable_get(:@control_implementation)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ControlImplementation.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ControlImplementation.as_json(item)
+        else
+          item
         end
-        doc["control-implementation"] = result.length == 1 ? result.first : result
       end
+      doc["control-implementation"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_import_profile_import_profile(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ImportProfile.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@import_profile, parsed.first)
+    end
+
+    def json_assembly_soa_to_import_profile_import_profile(instance, doc)
+      current = instance.instance_variable_get(:@import_profile)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImportProfile.as_json(item)
+        else
+          item
+        end
+      end
+      doc["import-profile"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_system_characteristics_system_characteristics(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::SystemCharacteristics.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@system_characteristics, parsed.first)
+    end
+
+    def json_assembly_soa_to_system_characteristics_system_characteristics(instance, doc)
+      current = instance.instance_variable_get(:@system_characteristics)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::SystemCharacteristics.as_json(item)
+        else
+          item
+        end
+      end
+      doc["system-characteristics"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_system_implementation_system_implementation(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::SystemImplementation.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@system_implementation, parsed.first)
+    end
+
+    def json_assembly_soa_to_system_implementation_system_implementation(instance, doc)
+      current = instance.instance_variable_get(:@system_implementation)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::SystemImplementation.as_json(item)
+        else
+          item
+        end
+      end
+      doc["system-implementation"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -12593,7 +16055,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -12610,10 +16074,13 @@ module Oscal::V1_2_1
   end
   class SystemCharacteristics < Base
     attribute :system_id, :system_id, collection: true
-    attribute :date_authorized, :date_authorized
-    attribute :remarks, :remarks
+    attribute :system_name, :string
+    attribute :system_name_short, :string
+    attribute :description, :system_characteristics_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :date_authorized, :date_authorized
+    attribute :security_sensitivity_level, :string
     attribute :system_information, :system_information
     attribute :security_impact_level, :security_impact_level
     attribute :status, :status
@@ -12621,19 +16088,19 @@ module Oscal::V1_2_1
     attribute :network_architecture, :network_architecture
     attribute :data_flow, :data_flow
     attribute :responsible_party, :responsible_party, collection: true
-    attribute :system_name, :string
-    attribute :system_name_short, :string
-    attribute :description, :system_characteristics_description
-    attribute :security_sensitivity_level, :string
+    attribute :remarks, :remarks
 
     xml do
       element "system-characteristics"
       ordered
       map_element "system-id", to: :system_id
-      map_element "date-authorized", to: :date_authorized
-      map_element "remarks", to: :remarks
+      map_element "system-name", to: :system_name
+      map_element "system-name-short", to: :system_name_short
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "date-authorized", to: :date_authorized
+      map_element "security-sensitivity-level", to: :security_sensitivity_level
       map_element "system-information", to: :system_information
       map_element "security-impact-level", to: :security_impact_level
       map_element "status", to: :status
@@ -12641,19 +16108,16 @@ module Oscal::V1_2_1
       map_element "network-architecture", to: :network_architecture
       map_element "data-flow", to: :data_flow
       map_element "responsible-party", to: :responsible_party
-      map_element "system-name", to: :system_name
-      map_element "system-name-short", to: :system_name_short
-      map_element "description", to: :description
-      map_element "security-sensitivity-level", to: :security_sensitivity_level
+      map_element "remarks", to: :remarks
     end
 
     key_value do
-      map "date-authorized", to: :date_authorized, with: { to: :json_to_date_authorized_date_authorized, from: :json_from_date_authorized_date_authorized }
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "system-name", to: :system_name, render_empty: true
       map "system-name-short", to: :system_name_short, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "date-authorized", to: :date_authorized, with: { to: :json_to_date_authorized_date_authorized, from: :json_from_date_authorized_date_authorized }
       map "security-sensitivity-level", to: :security_sensitivity_level, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-parties", to: :responsible_party, render_empty: true
@@ -12667,18 +16131,76 @@ module Oscal::V1_2_1
       map "data-flow", to: :data_flow, with: { to: :json_assembly_soa_to_data_flow_data_flow, from: :json_assembly_soa_from_data_flow_data_flow }
     end
 
-    def json_assembly_soa_to_system_information_system_information(instance, doc)
-      current = instance.instance_variable_get(:@system_information)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::SystemInformation.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_from_authorization_boundary_authorization_boundary(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::AuthorizationBoundary.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@authorization_boundary, parsed.first)
+    end
+
+    def json_assembly_soa_to_authorization_boundary_authorization_boundary(instance, doc)
+      current = instance.instance_variable_get(:@authorization_boundary)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AuthorizationBoundary.as_json(item)
+        else
+          item
         end
-        doc["system-information"] = result.length == 1 ? result.first : result
       end
+      doc["authorization-boundary"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_data_flow_data_flow(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::DataFlow.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@data_flow, parsed.first)
+    end
+
+    def json_assembly_soa_to_data_flow_data_flow(instance, doc)
+      current = instance.instance_variable_get(:@data_flow)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::DataFlow.as_json(item)
+        else
+          item
+        end
+      end
+      doc["data-flow"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_network_architecture_network_architecture(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::NetworkArchitecture.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@network_architecture, parsed.first)
+    end
+
+    def json_assembly_soa_to_network_architecture_network_architecture(instance, doc)
+      current = instance.instance_variable_get(:@network_architecture)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::NetworkArchitecture.as_json(item)
+        else
+          item
+        end
+      end
+      doc["network-architecture"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_security_impact_level_security_impact_level(instance, value)
@@ -12688,45 +16210,69 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::SecurityImpactLevel.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@security_impact_level, parsed)
+      instance.instance_variable_set(:@security_impact_level, parsed.first)
     end
 
     def json_assembly_soa_to_security_impact_level_security_impact_level(instance, doc)
       current = instance.instance_variable_get(:@security_impact_level)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::SecurityImpactLevel.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::SecurityImpactLevel.as_json(item)
+        else
+          item
         end
-        doc["security-impact-level"] = result.length == 1 ? result.first : result
       end
+      doc["security-impact-level"] = result.length == 1 ? result.first : result
     end
 
-    def json_assembly_soa_from_authorization_boundary_authorization_boundary(instance, value)
+    def json_assembly_soa_from_status_status(instance, value)
       items = case value
               when Hash then [value]
               when Array then value
               else return
               end
-      parsed = items.map { |item| Oscal::V1_2_1::AuthorizationBoundary.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@authorization_boundary, parsed)
+      parsed = items.map { |item| Oscal::V1_2_1::Status.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@status, parsed.first)
     end
 
-    def json_assembly_soa_to_authorization_boundary_authorization_boundary(instance, doc)
-      current = instance.instance_variable_get(:@authorization_boundary)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AuthorizationBoundary.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_status_status(instance, doc)
+      current = instance.instance_variable_get(:@status)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Status.as_json(item)
+        else
+          item
         end
-        doc["authorization-boundary"] = result.length == 1 ? result.first : result
       end
+      doc["status"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_system_information_system_information(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::SystemInformation.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@system_information, parsed.first)
+    end
+
+    def json_assembly_soa_to_system_information_system_information(instance, doc)
+      current = instance.instance_variable_get(:@system_information)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::SystemInformation.as_json(item)
+        else
+          item
+        end
+      end
+      doc["system-information"] = result.length == 1 ? result.first : result
     end
 
     def json_from_date_authorized_date_authorized(instance, value)
@@ -12745,76 +16291,40 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_assembly_soa_to_network_architecture_network_architecture(instance, doc)
-      current = instance.instance_variable_get(:@network_architecture)
+    def json_to_date_authorized_date_authorized(instance, doc)
+      current = instance.instance_variable_get(:@date_authorized)
       if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::NetworkArchitecture.as_json(item)
-          else
-            item
-          end
+        doc["date-authorized"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::DateAuthorized.as_json(item) : item
         end
-        doc["network-architecture"] = result.length == 1 ? result.first : result
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["date-authorized"] = Oscal::V1_2_1::DateAuthorized.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["date-authorized"] = val
+        end
       end
     end
 
-    def json_assembly_soa_from_network_architecture_network_architecture(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::NetworkArchitecture.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@network_architecture, parsed)
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemCharacteristicsDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SystemCharacteristicsDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
     end
 
-    def json_assembly_soa_to_data_flow_data_flow(instance, doc)
-      current = instance.instance_variable_get(:@data_flow)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::DataFlow.as_json(item)
-          else
-            item
-          end
-        end
-        doc["data-flow"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_data_flow_data_flow(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::DataFlow.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@data_flow, parsed)
-    end
-
-    def json_assembly_soa_from_status_status(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Status.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@status, parsed)
-    end
-
-    def json_assembly_soa_to_status_status(instance, doc)
-      current = instance.instance_variable_get(:@status)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Status.as_json(item)
-          else
-            item
-          end
-        end
-        doc["status"] = result.length == 1 ? result.first : result
-      end
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -12836,27 +16346,15 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
         else
           val = current.respond_to?(:content) ? current.content : current
           doc["remarks"] = val
-        end
-      end
-    end
-
-    def json_to_date_authorized_date_authorized(instance, doc)
-      current = instance.instance_variable_get(:@date_authorized)
-      if current.is_a?(Array)
-        doc["date-authorized"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["date-authorized"] = Oscal::V1_2_1::DateAuthorized.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["date-authorized"] = val
         end
       end
     end
@@ -12892,16 +16390,6 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_assembly_soa_from_system_information_system_information(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::SystemInformation.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@system_information, parsed)
-    end
-
     def self.metaschema_constraints
       @metaschema_constraints
     end
@@ -12916,24 +16404,24 @@ module Oscal::V1_2_1
     end
   end
   class SystemImplementation < Base
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :leveraged_authorization, :system_implementation_leveraged_authorization, collection: true
     attribute :system_user, :system_user, collection: true
     attribute :system_component, :system_component, collection: true
     attribute :inventory_item, :inventory_item, collection: true
-    attribute :leveraged_authorization, :system_implementation_leveraged_authorization, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "system-implementation"
       ordered
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "leveraged-authorization", to: :leveraged_authorization
       map_element "user", to: :system_user
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
-      map_element "leveraged-authorization", to: :leveraged_authorization
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -12965,7 +16453,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13071,7 +16561,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13087,28 +16579,48 @@ module Oscal::V1_2_1
     end
   end
   class AuthorizationBoundary < Base
-    attribute :remarks, :remarks
+    attribute :description, :authorization_boundary_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :diagram, :diagram, collection: true
-    attribute :description, :authorization_boundary_description
+    attribute :remarks, :remarks
 
     xml do
       element "authorization-boundary"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "diagram", to: :diagram
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "diagrams", to: :diagram, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizationBoundaryDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AuthorizationBoundaryDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13130,7 +16642,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13155,28 +16669,48 @@ module Oscal::V1_2_1
     end
   end
   class NetworkArchitecture < Base
-    attribute :remarks, :remarks
+    attribute :description, :network_architecture_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :diagram, :diagram, collection: true
-    attribute :description, :network_architecture_description
+    attribute :remarks, :remarks
 
     xml do
       element "network-architecture"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "diagram", to: :diagram
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "diagrams", to: :diagram, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::NetworkArchitectureDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::NetworkArchitectureDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13198,7 +16732,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13223,28 +16759,48 @@ module Oscal::V1_2_1
     end
   end
   class DataFlow < Base
-    attribute :remarks, :remarks
+    attribute :description, :data_flow_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :diagram, :diagram, collection: true
-    attribute :description, :data_flow_description
+    attribute :remarks, :remarks
 
     xml do
       element "data-flow"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "diagram", to: :diagram
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "diagrams", to: :diagram, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DataFlowDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DataFlowDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13266,7 +16822,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13291,20 +16849,20 @@ module Oscal::V1_2_1
     end
   end
   class Impact < Base
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :base, :base_field
     attribute :selected, :selected
     attribute :adjustment_justification, :adjustment_justification
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
 
     xml do
       element "impact"
       ordered
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "base", to: :base
       map_element "selected", to: :selected
       map_element "adjustment-justification", to: :adjustment_justification
-      map_element "prop", to: :property
-      map_element "link", to: :link
     end
 
     key_value do
@@ -13331,6 +16889,22 @@ module Oscal::V1_2_1
       end
     end
 
+    def json_to_adjustment_justification_adjustment_justification(instance, doc)
+      current = instance.instance_variable_get(:@adjustment_justification)
+      if current.is_a?(Array)
+        doc["adjustment-justification"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::AdjustmentJustification.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["adjustment-justification"] = Oscal::V1_2_1::AdjustmentJustification.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["adjustment-justification"] = val
+        end
+      end
+    end
+
     def json_from_base_base(instance, value)
       if value.is_a?(Array)
         parsed = value.map { |v| Oscal::V1_2_1::BaseField.of_json(v) }
@@ -13350,7 +16924,9 @@ module Oscal::V1_2_1
     def json_to_base_base(instance, doc)
       current = instance.instance_variable_get(:@base)
       if current.is_a?(Array)
-        doc["base"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["base"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::BaseField.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["base"] = Oscal::V1_2_1::BaseField.as_json(current)
@@ -13380,7 +16956,9 @@ module Oscal::V1_2_1
     def json_to_selected_selected(instance, doc)
       current = instance.instance_variable_get(:@selected)
       if current.is_a?(Array)
-        doc["selected"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["selected"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Selected.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["selected"] = Oscal::V1_2_1::Selected.as_json(current)
@@ -13391,50 +16969,76 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_to_adjustment_justification_adjustment_justification(instance, doc)
-      current = instance.instance_variable_get(:@adjustment_justification)
-      if current.is_a?(Array)
-        doc["adjustment-justification"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["adjustment-justification"] = Oscal::V1_2_1::AdjustmentJustification.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["adjustment-justification"] = val
-        end
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class Diagram < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :description, :diagram_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :description, :diagram_description
     attribute :caption, :diagram_caption
+    attribute :remarks, :remarks
 
     xml do
       element "diagram"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "description", to: :description
       map_element "caption", to: :caption
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
-      map "caption", to: :caption, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+      map "caption", to: :caption, with: { to: :json_md_to_caption_caption, from: :json_md_from_caption_caption }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
+    end
+
+    def json_md_from_caption_caption(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DiagramCaption, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DiagramCaption, value)
+               end
+      instance.instance_variable_set(:@caption, parsed)
+    end
+
+    def json_md_to_caption_caption(instance, doc)
+      current = instance.instance_variable_get(:@caption)
+      return if current.nil?
+      doc["caption"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DiagramDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::DiagramDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13456,7 +17060,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13483,39 +17089,39 @@ module Oscal::V1_2_1
   class ByComponent < Base
     attribute :component_uuid, :string
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :description, :by_component_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :set_parameter, :set_parameter, collection: true
     attribute :implementation_status, :implementation_status
-    attribute :responsible_role, :responsible_role, collection: true
-    attribute :description, :by_component_description
     attribute :export, :by_component_export
     attribute :inherited, :by_component_inherited, collection: true
     attribute :satisfied, :by_component_satisfied, collection: true
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "by-component"
       ordered
       map_attribute "component-uuid", to: :component_uuid
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "set-parameter", to: :set_parameter
       map_element "implementation-status", to: :implementation_status
-      map_element "responsible-role", to: :responsible_role
-      map_element "description", to: :description
       map_element "export", to: :export
       map_element "inherited", to: :inherited
       map_element "satisfied", to: :satisfied
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "component-uuid", to: :component_uuid
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "set-parameters", to: :set_parameter, render_empty: true
@@ -13526,16 +17132,6 @@ module Oscal::V1_2_1
       map "export", to: :export, with: { to: :json_assembly_soa_to_export_export, from: :json_assembly_soa_from_export_export }
     end
 
-    def json_assembly_soa_from_implementation_status_implementation_status(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ImplementationStatus.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@implementation_status, parsed)
-    end
-
     def json_assembly_soa_from_export_export(instance, value)
       items = case value
               when Hash then [value]
@@ -13543,35 +17139,65 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ByComponentExport.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@export, parsed)
+      instance.instance_variable_set(:@export, parsed.first)
     end
 
     def json_assembly_soa_to_export_export(instance, doc)
       current = instance.instance_variable_get(:@export)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ByComponentExport.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ByComponentExport.as_json(item)
+        else
+          item
         end
-        doc["export"] = result.length == 1 ? result.first : result
       end
+      doc["export"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_implementation_status_implementation_status(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ImplementationStatus.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@implementation_status, parsed.first)
     end
 
     def json_assembly_soa_to_implementation_status_implementation_status(instance, doc)
       current = instance.instance_variable_get(:@implementation_status)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImplementationStatus.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImplementationStatus.as_json(item)
+        else
+          item
         end
-        doc["implementation-status"] = result.length == 1 ? result.first : result
       end
+      doc["implementation-status"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ByComponentDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ByComponentDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13593,7 +17219,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13652,7 +17280,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13669,44 +17299,50 @@ module Oscal::V1_2_1
   end
   class LocalObjective < Base
     attribute :control_id, :string
-    attribute :remarks, :remarks
+    attribute :description, :local_objective_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :part, :part, collection: true
-    attribute :description, :local_objective_description
+    attribute :remarks, :remarks
 
     xml do
       element "local-objective"
       ordered
       map_attribute "control-id", to: :control_id
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "part", to: :part
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "control-id", to: :control_id
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "parts", to: :part, render_empty: true
     end
 
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::LocalObjectiveDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::LocalObjectiveDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13722,6 +17358,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -13740,44 +17392,30 @@ module Oscal::V1_2_1
   end
   class AssessmentMethod < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :description, :assessment_method_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :assessment_part, :assessment_part
-    attribute :description, :assessment_method_description
+    attribute :remarks, :remarks
 
     xml do
       element "assessment-method"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "part", to: :assessment_part
-      map_element "description", to: :description
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "assessment-part", to: :assessment_part, with: { to: :json_assembly_soa_to_assessment_part_assessment_part, from: :json_assembly_soa_from_assessment_part_assessment_part }
-    end
-
-    def json_assembly_soa_to_assessment_part_assessment_part(instance, doc)
-      current = instance.instance_variable_get(:@assessment_part)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentPart.as_json(item)
-          else
-            item
-          end
-        end
-        doc["assessment-part"] = result.length == 1 ? result.first : result
-      end
     end
 
     def json_assembly_soa_from_assessment_part_assessment_part(instance, value)
@@ -13787,7 +17425,41 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::AssessmentPart.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@assessment_part, parsed)
+      instance.instance_variable_set(:@assessment_part, parsed.first)
+    end
+
+    def json_assembly_soa_to_assessment_part_assessment_part(instance, doc)
+      current = instance.instance_variable_get(:@assessment_part)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentPart.as_json(item)
+        else
+          item
+        end
+      end
+      doc["assessment-part"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentMethodDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentMethodDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13809,7 +17481,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13829,11 +17503,11 @@ module Oscal::V1_2_1
     attribute :name, :string
     attribute :ns, :string
     attribute :class_attr, :string
+    attribute :title, :assessment_part_title
     attribute :property, :property, collection: true
+    attribute :prose, :assessment_part_prose
     attribute :assessment_part, :assessment_part, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :assessment_part_title
-    attribute :prose, :assessment_part_prose
 
     xml do
       element "assessment-part"
@@ -13842,11 +17516,11 @@ module Oscal::V1_2_1
       map_attribute "name", to: :name
       map_attribute "ns", to: :ns
       map_attribute "class", to: :class_attr
+      map_element "title", to: :title
       map_element "prop", to: :property
+      map_element "prose", to: :prose
       map_element "part", to: :assessment_part
       map_element "link", to: :link
-      map_element "title", to: :title
-      map_element "prose", to: :prose
     end
 
     key_value do
@@ -13854,11 +17528,51 @@ module Oscal::V1_2_1
       map "name", to: :name
       map "ns", to: :ns
       map "class", to: :class_attr
-      map "title", to: :title, render_empty: true
-      map "prose", to: :prose, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "prose", to: :prose, with: { to: :json_md_to_prose_prose, from: :json_md_from_prose_prose }
       map "props", to: :property, render_empty: true
       map "parts", to: :assessment_part, render_empty: true
       map "links", to: :link, render_empty: true
+    end
+
+    def json_md_from_prose_prose(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentPartProse, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentPartProse, value)
+               end
+      instance.instance_variable_set(:@prose, parsed)
+    end
+
+    def json_md_to_prose_prose(instance, doc)
+      current = instance.instance_variable_get(:@prose)
+      return if current.nil?
+      doc["prose"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentPartTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentPartTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def self.metaschema_constraints
@@ -13872,53 +17586,39 @@ module Oscal::V1_2_1
   end
   class Activity < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :reviewed_controls, :reviewed_controls
-    attribute :responsible_role, :responsible_role, collection: true
     attribute :title, :activity_title
     attribute :description, :activity_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :step, :activity_step, collection: true
+    attribute :reviewed_controls, :reviewed_controls
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "activity"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "related-controls", to: :reviewed_controls
-      map_element "responsible-role", to: :responsible_role
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "step", to: :step
+      map_element "related-controls", to: :reviewed_controls
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "responsible-roles", to: :responsible_role, render_empty: true
       map "steps", to: :step, render_empty: true
       map "related-controls", to: :reviewed_controls, with: { to: :json_assembly_soa_to_reviewed_controls_related_controls, from: :json_assembly_soa_from_reviewed_controls_related_controls }
-    end
-
-    def json_assembly_soa_to_reviewed_controls_related_controls(instance, doc)
-      current = instance.instance_variable_get(:@reviewed_controls)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ReviewedControls.as_json(item)
-          else
-            item
-          end
-        end
-        doc["related-controls"] = result.length == 1 ? result.first : result
-      end
     end
 
     def json_assembly_soa_from_reviewed_controls_related_controls(instance, value)
@@ -13928,7 +17628,61 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ReviewedControls.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@reviewed_controls, parsed)
+      instance.instance_variable_set(:@reviewed_controls, parsed.first)
+    end
+
+    def json_assembly_soa_to_reviewed_controls_related_controls(instance, doc)
+      current = instance.instance_variable_get(:@reviewed_controls)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ReviewedControls.as_json(item)
+        else
+          item
+        end
+      end
+      doc["related-controls"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ActivityDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ActivityDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ActivityTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ActivityTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -13950,7 +17704,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -13975,31 +17731,51 @@ module Oscal::V1_2_1
     end
   end
   class ReviewedControls < Base
-    attribute :remarks, :remarks
+    attribute :description, :reviewed_controls_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :description, :reviewed_controls_description
     attribute :control_selection, :reviewed_controls_control_selection, collection: true
     attribute :control_objective_selection, :reviewed_controls_control_objective_selection, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "reviewed-controls"
       ordered
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "description", to: :description
       map_element "control-selection", to: :control_selection
       map_element "control-objective-selection", to: :control_objective_selection
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "control-selections", to: :control_selection, render_empty: true
       map "control-objective-selections", to: :control_objective_selection, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ReviewedControlsDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ReviewedControlsDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14021,7 +17797,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14039,42 +17817,42 @@ module Oscal::V1_2_1
   class Task < Base
     attribute :uuid, :string
     attribute :type, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :task, :task, collection: true
-    attribute :assessment_subject, :assessment_subject, collection: true
-    attribute :responsible_role, :responsible_role, collection: true
     attribute :title, :task_title
     attribute :description, :task_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :timing, :task_timing
     attribute :dependency, :task_dependency, collection: true
+    attribute :task, :task, collection: true
     attribute :associated_activity, :task_associated_activity, collection: true
+    attribute :assessment_subject, :assessment_subject, collection: true
+    attribute :responsible_role, :responsible_role, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "task"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "type", to: :type
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "task", to: :task
-      map_element "subject", to: :assessment_subject
-      map_element "responsible-role", to: :responsible_role
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "timing", to: :timing
       map_element "dependency", to: :dependency
+      map_element "task", to: :task
       map_element "associated-activity", to: :associated_activity
+      map_element "subject", to: :assessment_subject
+      map_element "responsible-role", to: :responsible_role
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "tasks", to: :task, render_empty: true
@@ -14083,6 +17861,70 @@ module Oscal::V1_2_1
       map "dependencies", to: :dependency, render_empty: true
       map "associated-activities", to: :associated_activity, render_empty: true
       map "timing", to: :timing, with: { to: :json_assembly_soa_to_timing_timing, from: :json_assembly_soa_from_timing_timing }
+    end
+
+    def json_assembly_soa_from_timing_timing(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::TaskTiming.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@timing, parsed.first)
+    end
+
+    def json_assembly_soa_to_timing_timing(instance, doc)
+      current = instance.instance_variable_get(:@timing)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::TaskTiming.as_json(item)
+        else
+          item
+        end
+      end
+      doc["timing"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::TaskDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::TaskDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::TaskTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::TaskTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14104,7 +17946,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14115,60 +17959,36 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_assembly_soa_from_timing_timing(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::TaskTiming.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@timing, parsed)
-    end
-
-    def json_assembly_soa_to_timing_timing(instance, doc)
-      current = instance.instance_variable_get(:@timing)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::TaskTiming.as_json(item)
-          else
-            item
-          end
-        end
-        doc["timing"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class AssessmentSubject < Base
     attribute :type, :string
-    attribute :remarks, :remarks
+    attribute :description, :assessment_subject_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :select_subject_by_id, :select_subject_by_id, collection: true
-    attribute :description, :assessment_subject_description
     attribute :include_all, :include_all
+    attribute :select_subject_by_id, :select_subject_by_id, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "assessment-subject"
       ordered
       map_attribute "type", to: :type
-      map_element "remarks", to: :remarks
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "exclude-subject", to: :select_subject_by_id
-      map_element "description", to: :description
       map_element "include-all", to: :include_all
       map_element "include-subject", to: :select_subject_by_id
+      map_element "exclude-subject", to: :select_subject_by_id
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "type", to: :type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "exclude-subjects", to: :select_subject_by_id, render_empty: true
@@ -14183,21 +18003,41 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::IncludeAll.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@include_all, parsed)
+      instance.instance_variable_set(:@include_all, parsed.first)
     end
 
     def json_assembly_soa_to_include_all_include_all(instance, doc)
       current = instance.instance_variable_get(:@include_all)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::IncludeAll.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::IncludeAll.as_json(item)
+        else
+          item
         end
-        doc["include-all"] = result.length == 1 ? result.first : result
       end
+      doc["include-all"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentSubjectDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentSubjectDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14219,7 +18059,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14269,7 +18111,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14286,30 +18130,50 @@ module Oscal::V1_2_1
   end
   class AssessmentSubjectPlaceholder < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
     attribute :description, :assessment_subject_placeholder_description
     attribute :source, :assessment_subject_placeholder_source, collection: true
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "assessment-subject-placeholder"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
       map_element "description", to: :description
       map_element "source", to: :source
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "description", to: :description, render_empty: true
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "sources", to: :source, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentSubjectPlaceholderDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::AssessmentSubjectPlaceholderDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14331,7 +18195,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14349,18 +18215,18 @@ module Oscal::V1_2_1
   class SelectSubjectById < Base
     attribute :subject_uuid, :string
     attribute :subject_type, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "select-subject-by-id"
       ordered
       map_attribute "subject-uuid", to: :subject_uuid
       map_attribute "subject-type", to: :subject_type
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -14369,20 +18235,6 @@ module Oscal::V1_2_1
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
-    end
-
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14398,6 +18250,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -14408,43 +18276,49 @@ module Oscal::V1_2_1
   class SubjectReference < Base
     attribute :subject_uuid, :string
     attribute :subject_type, :string
-    attribute :remarks, :remarks
+    attribute :title, :subject_reference_title
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
-    attribute :title, :subject_reference_title
+    attribute :remarks, :remarks
 
     xml do
       element "subject-reference"
       ordered
       map_attribute "subject-uuid", to: :subject_uuid
       map_attribute "subject-type", to: :subject_type
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
       map_element "prop", to: :property
       map_element "link", to: :link
-      map_element "title", to: :title
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "subject-uuid", to: :subject_uuid
       map "subject-type", to: :subject_type
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
     end
 
-    def json_to_remarks_remarks(instance, doc)
-      current = instance.instance_variable_get(:@remarks)
-      if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["remarks"] = val
-        end
-      end
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SubjectReferenceTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::SubjectReferenceTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14460,6 +18334,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@remarks, Oscal::V1_2_1::Remarks.of_json(value))
+      end
+    end
+
+    def json_to_remarks_remarks(instance, doc)
+      current = instance.instance_variable_get(:@remarks)
+      if current.is_a?(Array)
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["remarks"] = val
+        end
       end
     end
 
@@ -14495,52 +18385,38 @@ module Oscal::V1_2_1
   class FindingTarget < Base
     attribute :type, :string
     attribute :target_id, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :implementation_status, :implementation_status
     attribute :title, :finding_target_title
     attribute :description, :finding_target_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :status, :finding_target_status
+    attribute :implementation_status, :implementation_status
+    attribute :remarks, :remarks
 
     xml do
       element "finding-target"
       ordered
       map_attribute "type", to: :type
       map_attribute "target-id", to: :target_id
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "implementation-status", to: :implementation_status
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "status", to: :status
+      map_element "implementation-status", to: :implementation_status
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "type", to: :type
       map "target-id", to: :target_id
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "implementation-status", to: :implementation_status, with: { to: :json_assembly_soa_to_implementation_status_implementation_status, from: :json_assembly_soa_from_implementation_status_implementation_status }
       map "status", to: :status, with: { to: :json_assembly_soa_to_status_status, from: :json_assembly_soa_from_status_status }
-    end
-
-    def json_assembly_soa_to_implementation_status_implementation_status(instance, doc)
-      current = instance.instance_variable_get(:@implementation_status)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImplementationStatus.as_json(item)
-          else
-            item
-          end
-        end
-        doc["implementation-status"] = result.length == 1 ? result.first : result
-      end
     end
 
     def json_assembly_soa_from_implementation_status_implementation_status(instance, value)
@@ -14550,7 +18426,85 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ImplementationStatus.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@implementation_status, parsed)
+      instance.instance_variable_set(:@implementation_status, parsed.first)
+    end
+
+    def json_assembly_soa_to_implementation_status_implementation_status(instance, doc)
+      current = instance.instance_variable_get(:@implementation_status)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImplementationStatus.as_json(item)
+        else
+          item
+        end
+      end
+      doc["implementation-status"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_status_status(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::FindingTargetStatus.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@status, parsed.first)
+    end
+
+    def json_assembly_soa_to_status_status(instance, doc)
+      current = instance.instance_variable_get(:@status)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::FindingTargetStatus.as_json(item)
+        else
+          item
+        end
+      end
+      doc["status"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTargetDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTargetDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTargetTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTargetTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14572,7 +18526,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14583,69 +18539,45 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_assembly_soa_from_status_status(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::FindingTargetStatus.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@status, parsed)
-    end
-
-    def json_assembly_soa_to_status_status(instance, doc)
-      current = instance.instance_variable_get(:@status)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::FindingTargetStatus.as_json(item)
-          else
-            item
-          end
-        end
-        doc["status"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class Finding < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
+    attribute :title, :finding_title
+    attribute :description, :finding_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :origin, :origin, collection: true
     attribute :finding_target, :finding_target
+    attribute :implementation_statement_uuid, :string
     attribute :related_observation, :related_observation, collection: true
     attribute :associated_risk, :associated_risk, collection: true
-    attribute :title, :finding_title
-    attribute :description, :finding_description
-    attribute :implementation_statement_uuid, :string
+    attribute :remarks, :remarks
 
     xml do
       element "finding"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "origin", to: :origin
       map_element "target", to: :finding_target
+      map_element "implementation-statement-uuid", to: :implementation_statement_uuid
       map_element "related-observation", to: :related_observation
       map_element "associated-risk", to: :associated_risk
-      map_element "title", to: :title
-      map_element "description", to: :description
-      map_element "implementation-statement-uuid", to: :implementation_statement_uuid
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
       map "implementation-statement-uuid", to: :implementation_statement_uuid, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "origins", to: :origin, render_empty: true
@@ -14661,21 +18593,61 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::FindingTarget.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@finding_target, parsed)
+      instance.instance_variable_set(:@finding_target, parsed.first)
     end
 
     def json_assembly_soa_to_finding_target_target(instance, doc)
       current = instance.instance_variable_get(:@finding_target)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::FindingTarget.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::FindingTarget.as_json(item)
+        else
+          item
         end
-        doc["target"] = result.length == 1 ? result.first : result
       end
+      doc["target"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::FindingTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14697,7 +18669,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14767,7 +18741,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14817,7 +18793,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14834,51 +18812,91 @@ module Oscal::V1_2_1
   end
   class Observation < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :origin, :origin, collection: true
-    attribute :subject_reference, :subject_reference, collection: true
     attribute :title, :observation_title
     attribute :description, :observation_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :method_attr, :string, collection: true
     attribute :type, :string, collection: true
+    attribute :origin, :origin, collection: true
+    attribute :subject_reference, :subject_reference, collection: true
+    attribute :relevant_evidence, :observation_relevant_evidence, collection: true
     attribute :collected, :string
     attribute :expires, :string
-    attribute :relevant_evidence, :observation_relevant_evidence, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "observation"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "origin", to: :origin
-      map_element "subject", to: :subject_reference
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "method", to: :method_attr
       map_element "type", to: :type
+      map_element "origin", to: :origin
+      map_element "subject", to: :subject_reference
+      map_element "relevant-evidence", to: :relevant_evidence
       map_element "collected", to: :collected
       map_element "expires", to: :expires
-      map_element "relevant-evidence", to: :relevant_evidence
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
       map "method", to: :method_attr, render_empty: true
       map "type", to: :type, render_empty: true
       map "collected", to: :collected, render_empty: true
       map "expires", to: :expires, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "origins", to: :origin, render_empty: true
       map "subjects", to: :subject_reference, render_empty: true
       map "relevant-evidence", to: :relevant_evidence, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ObservationDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ObservationDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ObservationTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ObservationTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -14900,7 +18918,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -14942,23 +18962,23 @@ module Oscal::V1_2_1
   end
   class RelatedTask < Base
     attribute :task_uuid, :string
-    attribute :remarks, :remarks
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :responsible_party, :responsible_party, collection: true
     attribute :assessment_subject, :assessment_subject, collection: true
     attribute :identified_subject, :related_task_identified_subject
+    attribute :remarks, :remarks
 
     xml do
       element "related-task"
       ordered
       map_attribute "task-uuid", to: :task_uuid
-      map_element "remarks", to: :remarks
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "responsible-party", to: :responsible_party
       map_element "subject", to: :assessment_subject
       map_element "identified-subject", to: :identified_subject
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -14971,20 +18991,6 @@ module Oscal::V1_2_1
       map "identified-subject", to: :identified_subject, with: { to: :json_assembly_soa_to_identified_subject_identified_subject, from: :json_assembly_soa_from_identified_subject_identified_subject }
     end
 
-    def json_assembly_soa_to_identified_subject_identified_subject(instance, doc)
-      current = instance.instance_variable_get(:@identified_subject)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::RelatedTaskIdentifiedSubject.as_json(item)
-          else
-            item
-          end
-        end
-        doc["identified-subject"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_identified_subject_identified_subject(instance, value)
       items = case value
               when Hash then [value]
@@ -14992,7 +18998,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::RelatedTaskIdentifiedSubject.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@identified_subject, parsed)
+      instance.instance_variable_set(:@identified_subject, parsed.first)
+    end
+
+    def json_assembly_soa_to_identified_subject_identified_subject(instance, doc)
+      current = instance.instance_variable_get(:@identified_subject)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::RelatedTaskIdentifiedSubject.as_json(item)
+        else
+          item
+        end
+      end
+      doc["identified-subject"] = result.length == 1 ? result.first : result
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -15014,7 +19034,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -15040,48 +19062,48 @@ module Oscal::V1_2_1
   end
   class Risk < Base
     attribute :uuid, :string
-    attribute :risk_status, :risk_status
-    attribute :threat_id, :threat_id, collection: true
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :origin, :origin, collection: true
-    attribute :characterization, :characterization, collection: true
-    attribute :response, :response, collection: true
-    attribute :related_observation, :related_observation, collection: true
     attribute :title, :risk_title
     attribute :description, :risk_description
     attribute :statement, :risk_statement
-    attribute :deadline, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
+    attribute :risk_status, :risk_status
+    attribute :origin, :origin, collection: true
+    attribute :threat_id, :threat_id, collection: true
+    attribute :characterization, :characterization, collection: true
     attribute :mitigating_factor, :risk_mitigating_factor, collection: true
+    attribute :deadline, :string
+    attribute :response, :response, collection: true
     attribute :risk_log, :risk_risk_log
+    attribute :related_observation, :related_observation, collection: true
 
     xml do
       element "risk"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "status", to: :risk_status
-      map_element "threat-id", to: :threat_id
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "origin", to: :origin
-      map_element "characterization", to: :characterization
-      map_element "response", to: :response
-      map_element "related-observation", to: :related_observation
       map_element "title", to: :title
       map_element "description", to: :description
       map_element "statement", to: :statement
-      map_element "deadline", to: :deadline
+      map_element "prop", to: :property
+      map_element "link", to: :link
+      map_element "status", to: :risk_status
+      map_element "origin", to: :origin
+      map_element "threat-id", to: :threat_id
+      map_element "characterization", to: :characterization
       map_element "mitigating-factor", to: :mitigating_factor
+      map_element "deadline", to: :deadline
+      map_element "response", to: :response
       map_element "risk-log", to: :risk_log
+      map_element "related-observation", to: :related_observation
     end
 
     key_value do
       map "uuid", to: :uuid
       map "status", to: :risk_status, with: { to: :json_to_risk_status_status, from: :json_from_risk_status_status }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
-      map "statement", to: :statement, render_empty: true
       map "deadline", to: :deadline, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
+      map "statement", to: :statement, with: { to: :json_md_to_statement_statement, from: :json_md_from_statement_statement }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "origins", to: :origin, render_empty: true
@@ -15092,6 +19114,90 @@ module Oscal::V1_2_1
       map "threat-ids", to: :threat_id, with: { to: :json_soa_to_threat_id_threat_ids, from: :json_soa_from_threat_id_threat_ids }
       map "threat-id", to: :threat_id, with: { to: :json_soa_to_threat_id_threat_ids, from: :json_soa_from_threat_id_threat_ids }
       map "risk-log", to: :risk_log, with: { to: :json_assembly_soa_to_risk_log_risk_log, from: :json_assembly_soa_from_risk_log_risk_log }
+    end
+
+    def json_assembly_soa_from_risk_log_risk_log(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::RiskRiskLog.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@risk_log, parsed.first)
+    end
+
+    def json_assembly_soa_to_risk_log_risk_log(instance, doc)
+      current = instance.instance_variable_get(:@risk_log)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::RiskRiskLog.as_json(item)
+        else
+          item
+        end
+      end
+      doc["risk-log"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_statement_statement(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskStatement, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskStatement, value)
+               end
+      instance.instance_variable_set(:@statement, parsed)
+    end
+
+    def json_md_to_statement_statement(instance, doc)
+      current = instance.instance_variable_get(:@statement)
+      return if current.nil?
+      doc["statement"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::RiskTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_risk_status_status(instance, value)
@@ -15113,7 +19219,9 @@ module Oscal::V1_2_1
     def json_to_risk_status_status(instance, doc)
       current = instance.instance_variable_get(:@risk_status)
       if current.is_a?(Array)
-        doc["status"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["status"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::RiskStatus.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["status"] = Oscal::V1_2_1::RiskStatus.as_json(current)
@@ -15153,30 +19261,6 @@ module Oscal::V1_2_1
         end
         doc["threat-ids"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_to_risk_log_risk_log(instance, doc)
-      current = instance.instance_variable_get(:@risk_log)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::RiskRiskLog.as_json(item)
-          else
-            item
-          end
-        end
-        doc["risk-log"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_risk_log_risk_log(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::RiskRiskLog.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@risk_log, parsed)
     end
 
     def self.metaschema_constraints
@@ -15221,21 +19305,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::Origin.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@origin, parsed)
+      instance.instance_variable_set(:@origin, parsed.first)
     end
 
     def json_assembly_soa_to_origin_origin(instance, doc)
       current = instance.instance_variable_get(:@origin)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Origin.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Origin.as_json(item)
+        else
+          item
         end
-        doc["origin"] = result.length == 1 ? result.first : result
       end
+      doc["origin"] = result.length == 1 ? result.first : result
     end
 
     def validate_occurrences
@@ -15245,41 +19329,81 @@ module Oscal::V1_2_1
   class Response < Base
     attribute :uuid, :string
     attribute :lifecycle, :string
-    attribute :remarks, :remarks
+    attribute :title, :response_title
+    attribute :description, :response_description
     attribute :property, :property, collection: true
     attribute :link, :link, collection: true
     attribute :origin, :origin, collection: true
-    attribute :task, :task, collection: true
-    attribute :title, :response_title
-    attribute :description, :response_description
     attribute :required_asset, :response_required_asset, collection: true
+    attribute :task, :task, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "response"
       ordered
       map_attribute "uuid", to: :uuid
       map_attribute "lifecycle", to: :lifecycle
-      map_element "remarks", to: :remarks
+      map_element "title", to: :title
+      map_element "description", to: :description
       map_element "prop", to: :property
       map_element "link", to: :link
       map_element "origin", to: :origin
-      map_element "task", to: :task
-      map_element "title", to: :title
-      map_element "description", to: :description
       map_element "required-asset", to: :required_asset
+      map_element "task", to: :task
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "lifecycle", to: :lifecycle
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "origins", to: :origin, render_empty: true
       map "tasks", to: :task, render_empty: true
       map "required-assets", to: :required_asset, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResponseDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResponseDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResponseTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResponseTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -15301,7 +19425,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -15363,7 +19489,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -15382,13 +19510,13 @@ module Oscal::V1_2_1
     attribute :uuid, :string
     attribute :metadata, :metadata
     attribute :import_ssp, :import_ssp
+    attribute :local_definitions, :assessment_plan_local_definitions
+    attribute :terms_and_conditions, :assessment_plan_terms_and_conditions
     attribute :reviewed_controls, :reviewed_controls
     attribute :assessment_subject, :assessment_subject, collection: true
     attribute :assessment_assets, :assessment_assets
     attribute :task, :task, collection: true
     attribute :back_matter, :back_matter
-    attribute :local_definitions, :assessment_plan_local_definitions
-    attribute :terms_and_conditions, :assessment_plan_terms_and_conditions
 
     xml do
       element "assessment-plan"
@@ -15396,13 +19524,13 @@ module Oscal::V1_2_1
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
       map_element "import-ssp", to: :import_ssp
+      map_element "local-definitions", to: :local_definitions
+      map_element "terms-and-conditions", to: :terms_and_conditions
       map_element "reviewed-controls", to: :reviewed_controls
       map_element "assessment-subject", to: :assessment_subject
       map_element "assessment-assets", to: :assessment_assets
       map_element "task", to: :task
       map_element "back-matter", to: :back_matter
-      map_element "local-definitions", to: :local_definitions
-      map_element "terms-and-conditions", to: :terms_and_conditions
     end
 
     key_value do
@@ -15418,28 +19546,28 @@ module Oscal::V1_2_1
       map "terms-and-conditions", to: :terms_and_conditions, with: { to: :json_assembly_soa_to_terms_and_conditions_terms_and_conditions, from: :json_assembly_soa_from_terms_and_conditions_terms_and_conditions }
     end
 
-    def json_assembly_soa_from_metadata_metadata(instance, value)
+    def json_assembly_soa_from_assessment_assets_assessment_assets(instance, value)
       items = case value
               when Hash then [value]
               when Array then value
               else return
               end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
+      parsed = items.map { |item| Oscal::V1_2_1::AssessmentAssets.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@assessment_assets, parsed.first)
     end
 
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_assessment_assets_assessment_assets(instance, doc)
+      current = instance.instance_variable_get(:@assessment_assets)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentAssets.as_json(item)
+        else
+          item
         end
-        doc["metadata"] = result.length == 1 ? result.first : result
       end
+      doc["assessment-assets"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
@@ -15449,35 +19577,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
     def json_assembly_soa_to_back_matter_back_matter(instance, doc)
       current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_to_import_ssp_import_ssp(instance, doc)
-      current = instance.instance_variable_get(:@import_ssp)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImportSsp.as_json(item)
-          else
-            item
-          end
-        end
-        doc["import-ssp"] = result.length == 1 ? result.first : result
-      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_import_ssp_import_ssp(instance, value)
@@ -15487,69 +19601,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ImportSsp.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@import_ssp, parsed)
+      instance.instance_variable_set(:@import_ssp, parsed.first)
     end
 
-    def json_assembly_soa_to_reviewed_controls_reviewed_controls(instance, doc)
-      current = instance.instance_variable_get(:@reviewed_controls)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ReviewedControls.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_import_ssp_import_ssp(instance, doc)
+      current = instance.instance_variable_get(:@import_ssp)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImportSsp.as_json(item)
+        else
+          item
         end
-        doc["reviewed-controls"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_from_reviewed_controls_reviewed_controls(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ReviewedControls.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@reviewed_controls, parsed)
-    end
-
-    def json_assembly_soa_to_assessment_assets_assessment_assets(instance, doc)
-      current = instance.instance_variable_get(:@assessment_assets)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentAssets.as_json(item)
-          else
-            item
-          end
-        end
-        doc["assessment-assets"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_assessment_assets_assessment_assets(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::AssessmentAssets.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@assessment_assets, parsed)
-    end
-
-    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
-      current = instance.instance_variable_get(:@local_definitions)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentPlanLocalDefinitions.as_json(item)
-          else
-            item
-          end
-        end
-        doc["local-definitions"] = result.length == 1 ? result.first : result
-      end
+      doc["import-ssp"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
@@ -15559,21 +19625,69 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::AssessmentPlanLocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@local_definitions, parsed)
+      instance.instance_variable_set(:@local_definitions, parsed.first)
     end
 
-    def json_assembly_soa_to_terms_and_conditions_terms_and_conditions(instance, doc)
-      current = instance.instance_variable_get(:@terms_and_conditions)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentPlanTermsAndConditions.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
+      current = instance.instance_variable_get(:@local_definitions)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentPlanLocalDefinitions.as_json(item)
+        else
+          item
         end
-        doc["terms-and-conditions"] = result.length == 1 ? result.first : result
       end
+      doc["local-definitions"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_reviewed_controls_reviewed_controls(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ReviewedControls.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@reviewed_controls, parsed.first)
+    end
+
+    def json_assembly_soa_to_reviewed_controls_reviewed_controls(instance, doc)
+      current = instance.instance_variable_get(:@reviewed_controls)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ReviewedControls.as_json(item)
+        else
+          item
+        end
+      end
+      doc["reviewed-controls"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_terms_and_conditions_terms_and_conditions(instance, value)
@@ -15583,7 +19697,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::AssessmentPlanTermsAndConditions.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@terms_and_conditions, parsed)
+      instance.instance_variable_set(:@terms_and_conditions, parsed.first)
+    end
+
+    def json_assembly_soa_to_terms_and_conditions_terms_and_conditions(instance, doc)
+      current = instance.instance_variable_get(:@terms_and_conditions)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentPlanTermsAndConditions.as_json(item)
+        else
+          item
+        end
+      end
+      doc["terms-and-conditions"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -15629,9 +19757,9 @@ module Oscal::V1_2_1
     attribute :uuid, :string
     attribute :metadata, :metadata
     attribute :import_ap, :import_ap
+    attribute :local_definitions, :assessment_results_local_definitions
     attribute :result, :result, collection: true
     attribute :back_matter, :back_matter
-    attribute :local_definitions, :assessment_results_local_definitions
 
     xml do
       element "assessment-results"
@@ -15639,9 +19767,9 @@ module Oscal::V1_2_1
       map_attribute "uuid", to: :uuid
       map_element "metadata", to: :metadata
       map_element "import-ap", to: :import_ap
+      map_element "local-definitions", to: :local_definitions
       map_element "result", to: :result
       map_element "back-matter", to: :back_matter
-      map_element "local-definitions", to: :local_definitions
     end
 
     key_value do
@@ -15653,30 +19781,6 @@ module Oscal::V1_2_1
       map "local-definitions", to: :local_definitions, with: { to: :json_assembly_soa_to_local_definitions_local_definitions, from: :json_assembly_soa_from_local_definitions_local_definitions }
     end
 
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -15684,45 +19788,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
     def json_assembly_soa_to_back_matter_back_matter(instance, doc)
       current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["back-matter"] = result.length == 1 ? result.first : result
       end
-    end
-
-    def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::AssessmentResultsLocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@local_definitions, parsed)
-    end
-
-    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
-      current = instance.instance_variable_get(:@local_definitions)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentResultsLocalDefinitions.as_json(item)
-          else
-            item
-          end
-        end
-        doc["local-definitions"] = result.length == 1 ? result.first : result
-      end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_import_ap_import_ap(instance, value)
@@ -15732,21 +19812,69 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ImportAp.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@import_ap, parsed)
+      instance.instance_variable_set(:@import_ap, parsed.first)
     end
 
     def json_assembly_soa_to_import_ap_import_ap(instance, doc)
       current = instance.instance_variable_get(:@import_ap)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImportAp.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImportAp.as_json(item)
+        else
+          item
         end
-        doc["import-ap"] = result.length == 1 ? result.first : result
       end
+      doc["import-ap"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::AssessmentResultsLocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@local_definitions, parsed.first)
+    end
+
+    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
+      current = instance.instance_variable_get(:@local_definitions)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentResultsLocalDefinitions.as_json(item)
+        else
+          item
+        end
+      end
+      doc["local-definitions"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def self.of_json(doc, options = {})
@@ -15823,7 +19951,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -15840,48 +19970,48 @@ module Oscal::V1_2_1
   end
   class Result < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :reviewed_controls, :reviewed_controls
-    attribute :observation, :observation, collection: true
-    attribute :risk, :risk, collection: true
-    attribute :finding, :finding, collection: true
     attribute :title, :result_title
     attribute :description, :result_description
     attribute :start, :string
     attribute :end, :string
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :local_definitions, :result_local_definitions
+    attribute :reviewed_controls, :reviewed_controls
     attribute :attestation, :result_attestation, collection: true
     attribute :assessment_log, :result_assessment_log
+    attribute :observation, :observation, collection: true
+    attribute :risk, :risk, collection: true
+    attribute :finding, :finding, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "result"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "reviewed-controls", to: :reviewed_controls
-      map_element "observation", to: :observation
-      map_element "risk", to: :risk
-      map_element "finding", to: :finding
       map_element "title", to: :title
       map_element "description", to: :description
       map_element "start", to: :start
       map_element "end", to: :end
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "local-definitions", to: :local_definitions
+      map_element "reviewed-controls", to: :reviewed_controls
       map_element "attestation", to: :attestation
       map_element "assessment-log", to: :assessment_log
+      map_element "observation", to: :observation
+      map_element "risk", to: :risk
+      map_element "finding", to: :finding
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
-      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
       map "start", to: :start, render_empty: true
       map "end", to: :end, render_empty: true
+      map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "observations", to: :observation, render_empty: true
@@ -15891,6 +20021,118 @@ module Oscal::V1_2_1
       map "reviewed-controls", to: :reviewed_controls, with: { to: :json_assembly_soa_to_reviewed_controls_reviewed_controls, from: :json_assembly_soa_from_reviewed_controls_reviewed_controls }
       map "local-definitions", to: :local_definitions, with: { to: :json_assembly_soa_to_local_definitions_local_definitions, from: :json_assembly_soa_from_local_definitions_local_definitions }
       map "assessment-log", to: :assessment_log, with: { to: :json_assembly_soa_to_assessment_log_assessment_log, from: :json_assembly_soa_from_assessment_log_assessment_log }
+    end
+
+    def json_assembly_soa_from_assessment_log_assessment_log(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ResultAssessmentLog.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@assessment_log, parsed.first)
+    end
+
+    def json_assembly_soa_to_assessment_log_assessment_log(instance, doc)
+      current = instance.instance_variable_get(:@assessment_log)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ResultAssessmentLog.as_json(item)
+        else
+          item
+        end
+      end
+      doc["assessment-log"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ResultLocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@local_definitions, parsed.first)
+    end
+
+    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
+      current = instance.instance_variable_get(:@local_definitions)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ResultLocalDefinitions.as_json(item)
+        else
+          item
+        end
+      end
+      doc["local-definitions"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_reviewed_controls_reviewed_controls(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::ReviewedControls.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@reviewed_controls, parsed.first)
+    end
+
+    def json_assembly_soa_to_reviewed_controls_reviewed_controls(instance, doc)
+      current = instance.instance_variable_get(:@reviewed_controls)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ReviewedControls.as_json(item)
+        else
+          item
+        end
+      end
+      doc["reviewed-controls"] = result.length == 1 ? result.first : result
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResultDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResultDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResultTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::ResultTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -15912,7 +20154,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -15923,87 +20167,15 @@ module Oscal::V1_2_1
       end
     end
 
-    def json_assembly_soa_from_reviewed_controls_reviewed_controls(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ReviewedControls.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@reviewed_controls, parsed)
-    end
-
-    def json_assembly_soa_to_reviewed_controls_reviewed_controls(instance, doc)
-      current = instance.instance_variable_get(:@reviewed_controls)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ReviewedControls.as_json(item)
-          else
-            item
-          end
-        end
-        doc["reviewed-controls"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ResultLocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@local_definitions, parsed)
-    end
-
-    def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
-      current = instance.instance_variable_get(:@local_definitions)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ResultLocalDefinitions.as_json(item)
-          else
-            item
-          end
-        end
-        doc["local-definitions"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_assessment_log_assessment_log(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::ResultAssessmentLog.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@assessment_log, parsed)
-    end
-
-    def json_assembly_soa_to_assessment_log_assessment_log(instance, doc)
-      current = instance.instance_variable_get(:@assessment_log)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ResultAssessmentLog.as_json(item)
-          else
-            item
-          end
-        end
-        doc["assessment-log"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def validate_occurrences
       Metaschema::ConstraintValidator.validate_occurrences(self, self.class.instance_variable_get(:@occurrence_constraints))
     end
   end
   class PlanOfActionAndMilestones < Base
     attribute :uuid, :string
-    attribute :system_id, :system_id
     attribute :metadata, :metadata
     attribute :import_ssp, :import_ssp
+    attribute :system_id, :system_id
     attribute :local_definitions, :local_definitions
     attribute :observation, :observation, collection: true
     attribute :risk, :risk, collection: true
@@ -16015,9 +20187,9 @@ module Oscal::V1_2_1
       element "plan-of-action-and-milestones"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "system-id", to: :system_id
       map_element "metadata", to: :metadata
       map_element "import-ssp", to: :import_ssp
+      map_element "system-id", to: :system_id
       map_element "local-definitions", to: :local_definitions
       map_element "observation", to: :observation
       map_element "risk", to: :risk
@@ -16039,58 +20211,6 @@ module Oscal::V1_2_1
       map "back-matter", to: :back_matter, with: { to: :json_assembly_soa_to_back_matter_back_matter, from: :json_assembly_soa_from_back_matter_back_matter }
     end
 
-    def json_to_system_id_system_id(instance, doc)
-      current = instance.instance_variable_get(:@system_id)
-      if current.is_a?(Array)
-        doc["system-id"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
-      elsif current
-        if current.is_a?(Lutaml::Model::Serializable)
-          doc["system-id"] = Oscal::V1_2_1::SystemId.as_json(current)
-        else
-          val = current.respond_to?(:content) ? current.content : current
-          doc["system-id"] = val
-        end
-      end
-    end
-
-    def json_assembly_soa_to_metadata_metadata(instance, doc)
-      current = instance.instance_variable_get(:@metadata)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::Metadata.as_json(item)
-          else
-            item
-          end
-        end
-        doc["metadata"] = result.length == 1 ? result.first : result
-      end
-    end
-
-    def json_assembly_soa_from_metadata_metadata(instance, value)
-      items = case value
-              when Hash then [value]
-              when Array then value
-              else return
-              end
-      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@metadata, parsed)
-    end
-
-    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
-      current = instance.instance_variable_get(:@back_matter)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::BackMatter.as_json(item)
-          else
-            item
-          end
-        end
-        doc["back-matter"] = result.length == 1 ? result.first : result
-      end
-    end
-
     def json_assembly_soa_from_back_matter_back_matter(instance, value)
       items = case value
               when Hash then [value]
@@ -16098,21 +20218,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::BackMatter.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@back_matter, parsed)
+      instance.instance_variable_set(:@back_matter, parsed.first)
     end
 
-    def json_assembly_soa_to_import_ssp_import_ssp(instance, doc)
-      current = instance.instance_variable_get(:@import_ssp)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::ImportSsp.as_json(item)
-          else
-            item
-          end
+    def json_assembly_soa_to_back_matter_back_matter(instance, doc)
+      current = instance.instance_variable_get(:@back_matter)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::BackMatter.as_json(item)
+        else
+          item
         end
-        doc["import-ssp"] = result.length == 1 ? result.first : result
       end
+      doc["back-matter"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_import_ssp_import_ssp(instance, value)
@@ -16122,7 +20242,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::ImportSsp.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@import_ssp, parsed)
+      instance.instance_variable_set(:@import_ssp, parsed.first)
+    end
+
+    def json_assembly_soa_to_import_ssp_import_ssp(instance, doc)
+      current = instance.instance_variable_get(:@import_ssp)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::ImportSsp.as_json(item)
+        else
+          item
+        end
+      end
+      doc["import-ssp"] = result.length == 1 ? result.first : result
     end
 
     def json_assembly_soa_from_local_definitions_local_definitions(instance, value)
@@ -16132,21 +20266,45 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::LocalDefinitions.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@local_definitions, parsed)
+      instance.instance_variable_set(:@local_definitions, parsed.first)
     end
 
     def json_assembly_soa_to_local_definitions_local_definitions(instance, doc)
       current = instance.instance_variable_get(:@local_definitions)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::LocalDefinitions.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::LocalDefinitions.as_json(item)
+        else
+          item
         end
-        doc["local-definitions"] = result.length == 1 ? result.first : result
       end
+      doc["local-definitions"] = result.length == 1 ? result.first : result
+    end
+
+    def json_assembly_soa_from_metadata_metadata(instance, value)
+      items = case value
+              when Hash then [value]
+              when Array then value
+              else return
+              end
+      parsed = items.map { |item| Oscal::V1_2_1::Metadata.of_json(item.is_a?(Hash) ? item : {}) }
+      instance.instance_variable_set(:@metadata, parsed.first)
+    end
+
+    def json_assembly_soa_to_metadata_metadata(instance, doc)
+      current = instance.instance_variable_get(:@metadata)
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::Metadata.as_json(item)
+        else
+          item
+        end
+      end
+      doc["metadata"] = result.length == 1 ? result.first : result
     end
 
     def json_from_system_id_system_id(instance, value)
@@ -16162,6 +20320,22 @@ module Oscal::V1_2_1
         end
       elsif value
         instance.instance_variable_set(:@system_id, Oscal::V1_2_1::SystemId.of_json(value))
+      end
+    end
+
+    def json_to_system_id_system_id(instance, doc)
+      current = instance.instance_variable_get(:@system_id)
+      if current.is_a?(Array)
+        doc["system-id"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::SystemId.as_json(item) : item
+        end
+      elsif current
+        if current.is_a?(Lutaml::Model::Serializable)
+          doc["system-id"] = Oscal::V1_2_1::SystemId.as_json(current)
+        else
+          val = current.respond_to?(:content) ? current.content : current
+          doc["system-id"] = val
+        end
       end
     end
 
@@ -16205,18 +20379,18 @@ module Oscal::V1_2_1
     end
   end
   class LocalDefinitions < Base
-    attribute :remarks, :remarks
     attribute :system_component, :system_component, collection: true
     attribute :inventory_item, :inventory_item, collection: true
     attribute :assessment_assets, :assessment_assets
+    attribute :remarks, :remarks
 
     xml do
       element "local-definitions"
       ordered
-      map_element "remarks", to: :remarks
       map_element "component", to: :system_component
       map_element "inventory-item", to: :inventory_item
       map_element "assessment-assets", to: :assessment_assets
+      map_element "remarks", to: :remarks
     end
 
     key_value do
@@ -16233,21 +20407,21 @@ module Oscal::V1_2_1
               else return
               end
       parsed = items.map { |item| Oscal::V1_2_1::AssessmentAssets.of_json(item.is_a?(Hash) ? item : {}) }
-      instance.instance_variable_set(:@assessment_assets, parsed)
+      instance.instance_variable_set(:@assessment_assets, parsed.first)
     end
 
     def json_assembly_soa_to_assessment_assets_assessment_assets(instance, doc)
       current = instance.instance_variable_get(:@assessment_assets)
-      if current.is_a?(Array)
-        result = current.map do |item|
-          if item.is_a?(Lutaml::Model::Serializable)
-            Oscal::V1_2_1::AssessmentAssets.as_json(item)
-          else
-            item
-          end
+      return if current.nil?
+      items = current.is_a?(Array) ? current : [current]
+      result = items.map do |item|
+        if item.is_a?(Lutaml::Model::Serializable)
+          Oscal::V1_2_1::AssessmentAssets.as_json(item)
+        else
+          item
         end
-        doc["assessment-assets"] = result.length == 1 ? result.first : result
       end
+      doc["assessment-assets"] = result.length == 1 ? result.first : result
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -16269,7 +20443,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
@@ -16295,42 +20471,82 @@ module Oscal::V1_2_1
   end
   class PoamItem < Base
     attribute :uuid, :string
-    attribute :remarks, :remarks
-    attribute :property, :property, collection: true
-    attribute :link, :link, collection: true
-    attribute :related_observation, :related_observation, collection: true
-    attribute :associated_risk, :associated_risk, collection: true
     attribute :title, :poam_item_title
     attribute :description, :poam_item_description
+    attribute :property, :property, collection: true
+    attribute :link, :link, collection: true
     attribute :origin, :poam_item_origin, collection: true
     attribute :related_finding, :poam_item_related_finding, collection: true
+    attribute :related_observation, :related_observation, collection: true
+    attribute :associated_risk, :associated_risk, collection: true
+    attribute :remarks, :remarks
 
     xml do
       element "poam-item"
       ordered
       map_attribute "uuid", to: :uuid
-      map_element "remarks", to: :remarks
-      map_element "prop", to: :property
-      map_element "link", to: :link
-      map_element "related-observation", to: :related_observation
-      map_element "associated-risk", to: :associated_risk
       map_element "title", to: :title
       map_element "description", to: :description
+      map_element "prop", to: :property
+      map_element "link", to: :link
       map_element "origin", to: :origin
       map_element "related-finding", to: :related_finding
+      map_element "related-observation", to: :related_observation
+      map_element "associated-risk", to: :associated_risk
+      map_element "remarks", to: :remarks
     end
 
     key_value do
       map "uuid", to: :uuid
       map "remarks", to: :remarks, with: { to: :json_to_remarks_remarks, from: :json_from_remarks_remarks }
-      map "title", to: :title, render_empty: true
-      map "description", to: :description, render_empty: true
+      map "title", to: :title, with: { to: :json_md_to_title_title, from: :json_md_from_title_title }
+      map "description", to: :description, with: { to: :json_md_to_description_description, from: :json_md_from_description_description }
       map "props", to: :property, render_empty: true
       map "links", to: :link, render_empty: true
       map "related-observations", to: :related_observation, render_empty: true
       map "related-risks", to: :associated_risk, render_empty: true
       map "origins", to: :origin, render_empty: true
       map "related-findings", to: :related_finding, render_empty: true
+    end
+
+    def json_md_from_description_description(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PoamItemDescription, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PoamItemDescription, value)
+               end
+      instance.instance_variable_set(:@description, parsed)
+    end
+
+    def json_md_to_description_description(instance, doc)
+      current = instance.instance_variable_get(:@description)
+      return if current.nil?
+      doc["description"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
+    end
+
+    def json_md_from_title_title(instance, value)
+      return if value.nil?
+      parsed = if value.is_a?(Array)
+                 value.map { |v| Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PoamItemTitle, v) }
+               else
+                 Metaschema::MarkupConverter.from_markdown(Oscal::V1_2_1::PoamItemTitle, value)
+               end
+      instance.instance_variable_set(:@title, parsed)
+    end
+
+    def json_md_to_title_title(instance, doc)
+      current = instance.instance_variable_get(:@title)
+      return if current.nil?
+      doc["title"] = if current.is_a?(Array)
+                          current.map { |m| Metaschema::MarkupConverter.to_markdown(m) }
+                        else
+                          Metaschema::MarkupConverter.to_markdown(current)
+                        end
     end
 
     def json_from_remarks_remarks(instance, value)
@@ -16352,7 +20568,9 @@ module Oscal::V1_2_1
     def json_to_remarks_remarks(instance, doc)
       current = instance.instance_variable_get(:@remarks)
       if current.is_a?(Array)
-        doc["remarks"] = current.map { |item| item.respond_to?(:content) ? item.content : item }
+        doc["remarks"] = current.map do |item|
+          item.is_a?(Lutaml::Model::Serializable) ? Oscal::V1_2_1::Remarks.as_json(item) : item
+        end
       elsif current
         if current.is_a?(Lutaml::Model::Serializable)
           doc["remarks"] = Oscal::V1_2_1::Remarks.as_json(current)
