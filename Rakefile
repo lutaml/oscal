@@ -45,7 +45,7 @@ namespace :oscal do
     end
 
     puts "Formatting with RuboCop..."
-    # The generated file always keeps offenses --autocorrect won't fix, so
+    # The generated files always keep offenses --autocorrect won't fix, so
     # STATUS_OFFENSES is expected. The report itself is just noise.
     status = RuboCop::CLI.new.run(
       ["--autocorrect", "--raise-cop-error", "--out", File::NULL, *paths],
