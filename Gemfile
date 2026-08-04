@@ -6,7 +6,8 @@ gemspec
 
 gem "canon"
 gem "lutaml-model", github: "lutaml/lutaml-model", branch: "main"
-gem "metaschema", github: "lutaml/metaschema"
+gem "metaschema", github: "lutaml/metaschema",
+                  branch: "fix/key-value-scalar-fields"
 gem "rake", "~> 13.0"
 gem "rspec", "~> 3.0"
 gem "rubocop"
