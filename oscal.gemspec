@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.required_ruby_version = Gem::Requirement.new(">= 3.0.0")
 
-  spec.add_dependency "lutaml-model", "~> 0.8.0"
+  spec.add_dependency "lutaml-model", "~> 0.8.114"
   spec.add_dependency "metaschema", "~> 0.2.0"
 
   spec.metadata["rubygems_mfa_required"] = "true"
