@@ -9,6 +9,7 @@ namespace :oscal do
   desc "Generate pre-built Ruby source for OSCAL models"
   task :generate, [:version] do |_t, args|
     require "metaschema"
+    require "rubocop"
 
     version = args[:version] || "1.2.1"
     version_module = "V#{version.gsub('.', '_')}"
@@ -36,10 +37,23 @@ namespace :oscal do
     )
 
     FileUtils.mkdir_p(version_dir)
-    files.each do |name, source|
+    paths = files.map do |name, source|
       path = File.join(version_dir, name)
       File.write(path, source)
       puts "  Created #{path}"
+      path
+    end
+
+    puts "Formatting with RuboCop..."
+    # The generated files always keep offenses --autocorrect won't fix, so
+    # STATUS_OFFENSES is expected. The report itself is just noise.
+    status = RuboCop::CLI.new.run(
+      ["--autocorrect", "--raise-cop-error", "--out", File::NULL, *paths],
+    )
+
+    accepted = [RuboCop::CLI::STATUS_SUCCESS, RuboCop::CLI::STATUS_OFFENSES]
+    unless accepted.include?(status)
+      abort "RuboCop failed formatting generated sources (status #{status})."
     end
 
     puts "Done! Generated #{files.size} files."
