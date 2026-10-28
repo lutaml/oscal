@@ -15,3 +15,5 @@ permissions:
 jobs:
   rake:
     uses: metanorma/ci/.github/workflows/generic-rake.yml@main
+    secrets:
+      pat_token: ${{ secrets.LUTAML_CI_PAT_TOKEN }}
