@@ -15,7 +15,14 @@ permissions:
   contents: write
   packages: write
   id-token: write
+  pull-requests: write
 
+  # The publish leg: when the release PR (head branch release/v*) merges,
+  # metanorma/ci tags the merge commit and publishes (metanorma/ci#515).
+  # Ordinary PR closes are skipped inside the reusable workflow.
+  pull_request:
+    types:
+      - closed
 jobs:
   release:
     uses: metanorma/ci/.github/workflows/rubygems-release.yml@main
